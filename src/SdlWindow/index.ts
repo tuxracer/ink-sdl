@@ -6,7 +6,11 @@
 
 import { EventEmitter } from "events";
 import { pickBy, isDefined } from "remeda";
-import { SdlUiRenderer, type SdlUiRendererOptions } from "../SdlUiRenderer";
+import {
+  SdlUiRenderer,
+  type SdlUiRendererOptions,
+  type ExistingSdlResources,
+} from "../SdlUiRenderer";
 import { SdlOutputStream } from "../SdlOutputStream";
 import { SdlInputStream } from "../SdlInputStream";
 import { getSdl2 } from "../Sdl2";
@@ -44,6 +48,37 @@ export interface SdlStreamsOptions {
   minWidth?: number | undefined;
   /** Minimum window height in pixels */
   minHeight?: number | undefined;
+  /**
+   * Use existing SDL window and renderer instead of creating new ones.
+   *
+   * When provided, ink-sdl will:
+   * - Use the existing window/renderer for all rendering
+   * - NOT destroy them when the window is closed (caller retains ownership)
+   * - Read dimensions from the existing window
+   * - Ignore width/height/title/fullscreen/borderless options
+   *
+   * @example
+   * ```typescript
+   * // Create your own SDL window and renderer
+   * const myWindow = SDL_CreateWindow(...);
+   * const myRenderer = SDL_CreateRenderer(myWindow, ...);
+   *
+   * // Use them with ink-sdl
+   * const streams = createSdlStreams({
+   *   existing: { window: myWindow, renderer: myRenderer },
+   *   fontSize: 16,
+   * });
+   *
+   * // When done with ink-sdl, clean up
+   * streams.window.close();
+   *
+   * // You can now use the window/renderer for other purposes
+   * // or destroy them yourself when fully done
+   * SDL_DestroyRenderer(myRenderer);
+   * SDL_DestroyWindow(myWindow);
+   * ```
+   */
+  existing?: ExistingSdlResources | undefined;
 }
 
 /**

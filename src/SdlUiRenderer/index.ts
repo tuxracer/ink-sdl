@@ -32,6 +32,20 @@ import {
 } from "../Sdl2";
 import type { SDLPointer, SdlKeyEvent } from "../Sdl2";
 import { AnsiParser, type DrawCommand, type Color } from "../AnsiParser";
+
+/**
+ * Existing SDL resources to use instead of creating new ones.
+ *
+ * When provided, ink-sdl will use these resources instead of creating its own.
+ * The caller retains ownership and is responsible for destroying them after
+ * ink-sdl is done.
+ */
+export interface ExistingSdlResources {
+  /** Existing SDL window pointer */
+  window: SDLPointer;
+  /** Existing SDL renderer pointer */
+  renderer: SDLPointer;
+}
 import { TextRenderer } from "../TextRenderer";
 import { InputBridge } from "../InputBridge";
 import {
@@ -139,6 +153,19 @@ export interface SdlUiRendererOptions {
   minWidth?: number | undefined;
   /** Minimum window height in pixels */
   minHeight?: number | undefined;
+  /**
+   * Use existing SDL window and renderer instead of creating new ones.
+   *
+   * When provided, ink-sdl will:
+   * - Use the existing window/renderer for all rendering
+   * - NOT destroy them when destroy() is called (caller retains ownership)
+   * - Read dimensions from the existing window
+   * - Ignore width/height/title/fullscreen/borderless options (window already exists)
+   *
+   * This enables sharing a single SDL window between ink-sdl and other renderers,
+   * such as an emulator that switches between menu UI and game rendering.
+   */
+  existing?: ExistingSdlResources | undefined;
 }
 
 /** Result from processing SDL events */
@@ -163,6 +190,11 @@ export class SdlUiRenderer {
   private renderer: SDLPointer | null = null;
   private textRenderer: TextRenderer | null = null;
   private renderTarget: SDLPointer | null = null;
+
+  /** Whether we own the window (should destroy it on cleanup) */
+  private ownsWindow = true;
+  /** Whether we own the renderer (should destroy it on cleanup) */
+  private ownsRenderer = true;
 
   private ansiParser: AnsiParser;
   private inputBridge: InputBridge;
@@ -205,14 +237,107 @@ export class SdlUiRenderer {
    * Initialize SDL window and renderer
    */
   private initSDL(options: SdlUiRendererOptions): void {
+    // Parse background color
+    this.defaultBgColor = parseBackgroundColor(options.backgroundColor);
+    this.bgColor = { ...this.defaultBgColor };
+
+    // Check if using existing resources
+    if (options.existing) {
+      this.initWithExistingResources(options);
+    } else {
+      this.initNewResources(options);
+    }
+
+    // Store user's explicit scale factor preference
+    this.userScaleFactor =
+      options.scaleFactor === undefined ? null : options.scaleFactor;
+
+    // Get scale factor
+    if (this.userScaleFactor !== null) {
+      this.scaleFactor = this.userScaleFactor;
+    } else {
+      this.scaleFactor = this.sdl.getScaleFactorFromRenderer(
+        this.window!,
+        this.renderer!
+      );
+    }
+
+    // Create text renderer
+    this.textRenderer = new TextRenderer(this.renderer!, {
+      fontSize: options.fontSize ?? DEFAULT_FONT_SIZE,
+      scaleFactor: this.scaleFactor,
+      ...(options.systemFont && { systemFont: true }),
+      ...(options.fontPath && { fontPath: options.fontPath }),
+      ...(options.fontName && { fontName: options.fontName }),
+    });
+
+    // Get character dimensions
+    const charDims = this.textRenderer.getCharDimensions();
+    this.charWidth = charDims.width;
+    this.charHeight = charDims.height;
+
+    // Calculate terminal dimensions
+    this.updateTerminalDimensions();
+
+    // Create render target texture for persistent drawing
+    // This solves the double-buffering issue where SDL swaps buffers on present,
+    // causing incremental updates from Ink to be lost
+    this.createRenderTarget();
+
+    // Set background color
+    this.setDrawColor(this.defaultBgColor);
+
+    // Initial clear of the render target
+    this.sdl.setRenderTarget(this.renderer!, this.renderTarget);
+    this.sdl.renderClear(this.renderer!);
+    this.sdl.setRenderTarget(this.renderer!, null);
+
+    // Present initial black frame
+    this.sdl.renderClear(this.renderer!);
+    this.sdl.renderPresent(this.renderer!);
+
+    // Bring window to front (only if we own the window)
+    if (this.ownsWindow) {
+      this.sdl.raiseWindow(this.window!);
+    }
+  }
+
+  /**
+   * Initialize with existing SDL window and renderer
+   */
+  private initWithExistingResources(options: SdlUiRendererOptions): void {
+    const existing = options.existing!;
+
+    // Use existing resources - caller retains ownership
+    this.window = existing.window;
+    this.renderer = existing.renderer;
+    this.ownsWindow = false;
+    this.ownsRenderer = false;
+
+    // Initialize SDL for events only (if not already initialized)
+    // SDL_Init is idempotent and won't re-initialize already-initialized subsystems
+    if (!this.sdl.init(SDL_INIT_EVENTS)) {
+      throw new Error("Failed to initialize SDL2 events");
+    }
+
+    // Read dimensions from existing window
+    const size = this.sdl.getWindowSize(this.window);
+    this.windowWidth = size.width;
+    this.windowHeight = size.height;
+  }
+
+  /**
+   * Initialize by creating new SDL window and renderer
+   */
+  private initNewResources(options: SdlUiRendererOptions): void {
     // Initialize SDL
     if (!this.sdl.init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
       throw new Error("Failed to initialize SDL2 for UI rendering");
     }
 
-    // Parse background color
-    this.defaultBgColor = parseBackgroundColor(options.backgroundColor);
-    this.bgColor = { ...this.defaultBgColor };
+    // We own the resources we create
+    this.ownsWindow = true;
+    this.ownsRenderer = true;
 
     // Build window flags
     let windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
@@ -257,57 +382,6 @@ export class SdlUiRenderer {
         ? SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC
         : SDL_RENDERER_ACCELERATED;
     this.renderer = this.sdl.createRenderer(this.window, -1, rendererFlags);
-
-    // Store user's explicit scale factor preference
-    this.userScaleFactor =
-      options.scaleFactor === undefined ? null : options.scaleFactor;
-
-    // Get scale factor
-    if (this.userScaleFactor !== null) {
-      this.scaleFactor = this.userScaleFactor;
-    } else {
-      this.scaleFactor = this.sdl.getScaleFactorFromRenderer(
-        this.window,
-        this.renderer
-      );
-    }
-
-    // Create text renderer
-    this.textRenderer = new TextRenderer(this.renderer, {
-      fontSize: options.fontSize ?? DEFAULT_FONT_SIZE,
-      scaleFactor: this.scaleFactor,
-      ...(options.systemFont && { systemFont: true }),
-      ...(options.fontPath && { fontPath: options.fontPath }),
-      ...(options.fontName && { fontName: options.fontName }),
-    });
-
-    // Get character dimensions
-    const charDims = this.textRenderer.getCharDimensions();
-    this.charWidth = charDims.width;
-    this.charHeight = charDims.height;
-
-    // Calculate terminal dimensions
-    this.updateTerminalDimensions();
-
-    // Create render target texture for persistent drawing
-    // This solves the double-buffering issue where SDL swaps buffers on present,
-    // causing incremental updates from Ink to be lost
-    this.createRenderTarget();
-
-    // Set background color
-    this.setDrawColor(this.defaultBgColor);
-
-    // Initial clear of the render target
-    this.sdl.setRenderTarget(this.renderer, this.renderTarget);
-    this.sdl.renderClear(this.renderer);
-    this.sdl.setRenderTarget(this.renderer, null);
-
-    // Present initial black frame
-    this.sdl.renderClear(this.renderer);
-    this.sdl.renderPresent(this.renderer);
-
-    // Bring window to front
-    this.sdl.raiseWindow(this.window);
   }
 
   /**
@@ -788,6 +862,11 @@ export class SdlUiRenderer {
 
   /**
    * Clean up resources
+   *
+   * When using existing window/renderer (via `existing` option), this method
+   * will NOT destroy the window or renderer - only the resources created by
+   * ink-sdl (TextRenderer, render target texture). The caller is responsible
+   * for destroying the window/renderer they provided.
    */
   destroy(): void {
     if (this.textRenderer) {
@@ -800,14 +879,25 @@ export class SdlUiRenderer {
       this.renderTarget = null;
     }
 
-    if (this.renderer) {
+    // Only destroy resources we own
+    if (this.ownsRenderer && this.renderer) {
       this.sdl.destroyRenderer(this.renderer);
-      this.renderer = null;
     }
-    if (this.window) {
+    this.renderer = null;
+
+    if (this.ownsWindow && this.window) {
       this.sdl.destroyWindow(this.window);
-      this.window = null;
     }
+    this.window = null;
+  }
+
+  /**
+   * Check if this renderer owns the SDL window
+   *
+   * Returns false when using an existing window via the `existing` option.
+   */
+  ownsResources(): boolean {
+    return this.ownsWindow && this.ownsRenderer;
   }
 
   /**

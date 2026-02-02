@@ -62,7 +62,11 @@ export const isSdlAvailable = (): boolean => {
 };
 
 // Advanced exports for custom implementations
-export { SdlUiRenderer, type SdlUiRendererOptions } from "./SdlUiRenderer";
+export {
+  SdlUiRenderer,
+  type SdlUiRendererOptions,
+  type ExistingSdlResources,
+} from "./SdlUiRenderer";
 export { AnsiParser, type Color, type DrawCommand } from "./AnsiParser";
 export { TextRenderer } from "./TextRenderer";
 export { InputBridge, type InkKeyEvent } from "./InputBridge";

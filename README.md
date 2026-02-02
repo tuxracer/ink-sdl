@@ -168,6 +168,7 @@ Creates stdin/stdout streams and a window for use with Ink.
 | `borderless`      | `boolean`                            | `false`     | Remove window decorations (title bar, borders)             |
 | `minWidth`        | `number`                             | `undefined` | Minimum window width in pixels                             |
 | `minHeight`       | `number`                             | `undefined` | Minimum window height in pixels                            |
+| `existing`        | `ExistingSdlResources`               | `undefined` | Use existing SDL window/renderer (see Advanced Usage)      |
 
 #### Returns
 
@@ -213,6 +214,49 @@ if (isSdlAvailable()) {
 
 ## Advanced Usage
 
+### Using Existing SDL Window/Renderer
+
+For applications that need to share a single SDL window between ink-sdl and custom rendering (e.g., an emulator with a menu UI), you can pass existing SDL resources:
+
+```typescript
+import { render, Text, Box } from "ink";
+import { createSdlStreams, getSdl2, type ExistingSdlResources } from "ink-sdl";
+
+// Create your own SDL window and renderer
+const sdl = getSdl2();
+sdl.init(0x20 | 0x4000); // SDL_INIT_VIDEO | SDL_INIT_EVENTS
+
+const myWindow = sdl.createWindow("My App", 100, 100, 800, 600, 0x4);
+const myRenderer = sdl.createRenderer(myWindow, -1, 0x2);
+
+// Use them with ink-sdl
+const streams = createSdlStreams({
+  existing: { window: myWindow, renderer: myRenderer },
+  fontSize: 16,
+});
+
+render(<MenuApp />, { stdin: streams.stdin, stdout: streams.stdout });
+
+// When done with ink-sdl UI, close() cleans up ink-sdl resources
+// but does NOT destroy your window/renderer
+streams.window.close();
+
+// You can now render directly to the same window, or create new streams later
+// When completely done, destroy the window/renderer yourself
+sdl.destroyRenderer(myRenderer);
+sdl.destroyWindow(myWindow);
+```
+
+**Ownership rules:**
+
+- When `existing` is provided, ink-sdl does NOT own the window/renderer
+- `close()` will NOT destroy the provided window/renderer
+- The caller retains ownership and must destroy them when fully done
+- Window options (`width`, `height`, `title`, `fullscreen`, `borderless`) are ignored
+- Rendering options (`fontSize`, `scaleFactor`, `fontPath`, etc.) still apply
+
+### Low-Level Components
+
 For more control, you can use the lower-level components directly:
 
 ```typescript
@@ -223,6 +267,8 @@ import {
   InputBridge,
   getSdl2,
   getSdlTtf,
+  type ExistingSdlResources,
+  type SDLPointer,
 } from "ink-sdl";
 ```
 

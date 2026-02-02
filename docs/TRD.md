@@ -260,8 +260,62 @@ interface SdlStreamsOptions {
 
   // Behavior
   vsync?: boolean; // Default: true
+
+  // Advanced: Use existing SDL window/renderer
+  existing?: {
+    window: SDLPointer; // Existing SDL window
+    renderer: SDLPointer; // Existing SDL renderer
+  };
 }
 ```
+
+### Using Existing SDL Window/Renderer
+
+For applications that need to share a single SDL window between ink-sdl and custom rendering (e.g., an emulator with a menu UI), you can pass existing SDL resources:
+
+```typescript
+import { createSdlStreams, getSdl2, type SDLPointer } from "ink-sdl";
+
+// Create your own SDL window and renderer
+const sdl = getSdl2();
+sdl.init(SDL_INIT_VIDEO | SDL_INIT_EVENTS);
+
+const myWindow = sdl.createWindow("My App", x, y, width, height, flags);
+const myRenderer = sdl.createRenderer(myWindow, -1, rendererFlags);
+
+// Use them with ink-sdl for the UI
+const streams = createSdlStreams({
+  existing: { window: myWindow, renderer: myRenderer },
+  fontSize: 16,
+});
+
+render(<MenuApp />, { stdin: streams.stdin, stdout: streams.stdout });
+
+// When switching to custom rendering (e.g., game mode):
+streams.window.close(); // Cleans up ink-sdl resources, but NOT the window/renderer
+
+// Now you can render directly to the same window
+SDL_RenderClear(myRenderer);
+// ... your custom rendering ...
+SDL_RenderPresent(myRenderer);
+
+// When switching back to UI mode, create new streams with the same window
+const newStreams = createSdlStreams({
+  existing: { window: myWindow, renderer: myRenderer },
+});
+
+// When completely done, destroy the window/renderer yourself
+sdl.destroyRenderer(myRenderer);
+sdl.destroyWindow(myWindow);
+```
+
+**Ownership rules:**
+
+- When `existing` is provided, ink-sdl does NOT own the window/renderer
+- `destroy()` / `close()` will NOT destroy the provided window/renderer
+- The caller retains ownership and must destroy them when done
+- Window options (width, height, title, fullscreen, borderless) are ignored when using existing resources
+- Rendering options (fontSize, scaleFactor, etc.) still apply
 
 ## ANSI Sequence Support
 
@@ -587,6 +641,52 @@ const { stdin, stdout } = createSdlStreams({
   fontPath: "/path/to/my/font.ttf",
   fontSize: 18,
 });
+```
+
+### Shared Window (Emulator Pattern)
+
+For applications like emulators that switch between ink-sdl UI and custom rendering:
+
+```typescript
+import { render, Text, Box } from "ink";
+import { createSdlStreams, getSdl2 } from "ink-sdl";
+
+// Create a single window for the entire application
+const sdl = getSdl2();
+sdl.init(0x20 | 0x4000); // SDL_INIT_VIDEO | SDL_INIT_EVENTS
+
+const window = sdl.createWindow("Emulator", 100, 100, 800, 600, 0x4);
+const renderer = sdl.createRenderer(window, -1, 0x2);
+
+let uiStreams: ReturnType<typeof createSdlStreams> | null = null;
+
+// Enter UI mode
+const enterUIMode = () => {
+  uiStreams = createSdlStreams({
+    existing: { window, renderer },
+    fontSize: 16,
+  });
+
+  render(<MenuApp onSelectGame={enterGameMode} />, {
+    stdin: uiStreams.stdin,
+    stdout: uiStreams.stdout,
+  });
+};
+
+// Enter game mode
+const enterGameMode = (rom: string) => {
+  // Clean up ink-sdl (doesn't destroy our window)
+  uiStreams?.window.close();
+  uiStreams = null;
+
+  // Now render the game directly to the same window
+  runEmulator(renderer, rom, {
+    onExit: enterUIMode, // Return to menu when game exits
+  });
+};
+
+// Start in UI mode
+enterUIMode();
 ```
 
 ## Future Considerations
