@@ -71,6 +71,12 @@ export class SdlWindow extends EventEmitter {
       for (const event of keyEvents) {
         const sequence = this.renderer.keyEventToSequence(event);
         if (sequence) {
+          // Ctrl+C sends SIGINT to the process (like a real terminal)
+          if (sequence === "\x03") {
+            process.kill(process.pid, "SIGINT");
+            continue;
+          }
+
           this.inputStream.pushKey(sequence);
           this.emit("key", event);
         }
