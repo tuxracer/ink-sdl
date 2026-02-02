@@ -68,6 +68,9 @@ pnpm exec tsx examples/hello.tsx --scale-factor 2.0
 # Use system font instead of bundled Cozette
 pnpm exec tsx examples/hello.tsx --system-font
 
+# Use a custom TTF font
+pnpm exec tsx examples/hello.tsx --font /path/to/font.ttf
+
 # All options
 pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-size 18 --scale-factor 1.5 --system-font
 ```
@@ -77,6 +80,7 @@ pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-
 | `--title`        | Window title                                 |
 | `--width`        | Window width in pixels                       |
 | `--height`       | Window height in pixels                      |
+| `--font`         | Path to a custom TTF font file               |
 | `--font-size`    | Font size in points                          |
 | `--scale-factor` | Scale factor (omit for auto-detect)          |
 | `--system-font`  | Use system monospace font instead of Cozette |
@@ -143,6 +147,7 @@ Creates stdin/stdout streams and a window for use with Ink.
 | `fontSize`    | `number`         | `16`        | Font size in points                          |
 | `scaleFactor` | `number \| null` | `null`      | Override scale factor (null = auto-detect)   |
 | `systemFont`  | `boolean`        | `false`     | Use system monospace font instead of Cozette |
+| `fontPath`    | `string`         | `undefined` | Path to a custom TTF font file               |
 
 #### Returns
 

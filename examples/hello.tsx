@@ -12,6 +12,7 @@
  * CLI options:
  *   --terminal              Render to terminal instead of SDL window
  *   --system-font           Use system font instead of bundled Cozette
+ *   --font <path>           Path to a custom TTF font file
  *   --title <string>        Window title
  *   --width <number>        Window width in pixels
  *   --height <number>       Window height in pixels
@@ -30,6 +31,7 @@ const { values: args } = parseArgs({
     title: { type: "string" },
     width: { type: "string" },
     height: { type: "string" },
+    font: { type: "string" },
     "font-size": { type: "string" },
     "scale-factor": { type: "string" },
     "system-font": { type: "boolean", default: false },
@@ -421,6 +423,7 @@ if (args.terminal) {
       ? parseFloat(args["scale-factor"])
       : undefined,
     systemFont: args["system-font"],
+    fontPath: args.font,
   });
 
   const scaleFactor = renderer.getScaleFactor();

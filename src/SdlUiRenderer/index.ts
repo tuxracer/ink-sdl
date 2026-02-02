@@ -68,6 +68,8 @@ export interface SdlUiRendererOptions {
   scaleFactor?: number | null;
   /** Use system font instead of bundled Cozette font */
   systemFont?: boolean;
+  /** Path to a custom TTF font file */
+  fontPath?: string;
 }
 
 /** Result from processing SDL events */
@@ -174,6 +176,7 @@ export class SdlUiRenderer {
       fontSize: options.fontSize ?? DEFAULT_FONT_SIZE,
       scaleFactor: this.scaleFactor,
       ...(options.systemFont && { systemFont: true }),
+      ...(options.fontPath && { fontPath: options.fontPath }),
     });
 
     // Get character dimensions

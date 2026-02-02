@@ -30,6 +30,8 @@ export interface SdlStreamsOptions {
   scaleFactor?: number | null;
   /** Use system font instead of bundled Cozette font */
   systemFont?: boolean;
+  /** Path to a custom TTF font file */
+  fontPath?: string;
 }
 
 /**
