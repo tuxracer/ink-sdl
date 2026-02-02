@@ -1,15 +1,23 @@
 {
   "name": "ink-sdl",
   "version": "0.1.0",
-  "description": "Render Ink TUI to SDL",
+  "description": "Render Ink TUI to SDL window",
   "type": "module",
   "main": "dist/index.js",
-  "bin": {
-    "ink-sdl": "dist/index.js"
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
   },
+  "files": [
+    "dist",
+    "src/fonts"
+  ],
   "scripts": {
-    "dev": "tsx src/index.tsx",
-    "build": "tsup src/index.tsx --format esm --dts --clean",
+    "dev": "tsx src/index.ts",
+    "build": "tsup src/index.ts --format esm --dts --clean",
     "start": "node dist/index.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",
@@ -20,7 +28,10 @@
   "keywords": [
     "terminal",
     "tui",
-    "sdl"
+    "sdl",
+    "ink",
+    "react",
+    "cli"
   ],
   "author": "Derek Petersen",
   "license": "MIT",
@@ -29,19 +40,23 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
-    "ink": "^6.6.0",
-    "react": "^19.2.4"
+    "koffi": "^2.9.3"
+  },
+  "peerDependencies": {
+    "ink": "^5.0.0 || ^6.0.0",
+    "react": "^18.0.0 || ^19.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@types/node": "^22.13.1",
     "@types/react": "^19.2.10",
-    "@types/terminal-kit": "^2.5.7",
     "@typescript-eslint/eslint-plugin": "^8.22.0",
     "@typescript-eslint/parser": "^8.22.0",
     "eslint": "^9.19.0",
     "eslint-plugin-prefer-arrow-functions": "^3.4.1",
+    "ink": "^6.6.0",
     "prettier": "^3.4.2",
+    "react": "^19.2.4",
     "tsup": "^8.5.1",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3",
