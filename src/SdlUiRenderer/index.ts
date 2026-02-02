@@ -65,6 +65,8 @@ export interface SdlUiRendererOptions {
   vsync?: boolean;
   fontSize?: number;
   scaleFactor?: number | null;
+  /** Use system font instead of bundled Cozette font */
+  systemFont?: boolean;
 }
 
 /** Result from processing SDL events */
@@ -169,6 +171,7 @@ export class SdlUiRenderer {
     this.textRenderer = new TextRenderer(this.renderer, {
       fontSize: options.fontSize ?? DEFAULT_FONT_SIZE,
       scaleFactor: this.scaleFactor,
+      ...(options.systemFont && { systemFont: true }),
     });
 
     // Get character dimensions

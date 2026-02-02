@@ -63,6 +63,7 @@ export class TextRenderer {
       fontSize?: number;
       scaleFactor?: number;
       fontPath?: string;
+      systemFont?: boolean;
     } = {}
   ) {
     this.renderer = renderer;
@@ -75,7 +76,10 @@ export class TextRenderer {
     }
 
     // Load font with fallback support
-    const fontPath = options.fontPath ?? this.findAvailableFont();
+    // If systemFont is true, skip the default Cozette font and use system fonts
+    const fontPath =
+      options.fontPath ??
+      (options.systemFont ? this.findSystemFont() : this.findAvailableFont());
     this.loadFont(fontPath);
   }
 
@@ -193,6 +197,25 @@ export class TextRenderer {
 
     // Return default path even if it doesn't exist - loadFont will handle the error
     return defaultPath;
+  }
+
+  /**
+   * Find a system font, skipping the default bundled font
+   */
+  private findSystemFont(): string {
+    // Only try platform-specific fallback fonts
+    for (const fallbackPath of this.getFallbackFontPaths()) {
+      try {
+        if (existsSync(fallbackPath)) {
+          return fallbackPath;
+        }
+      } catch {
+        // Continue to next fallback
+      }
+    }
+
+    // If no system font found, fall back to the default
+    return this.getDefaultFontPath();
   }
 
   /**

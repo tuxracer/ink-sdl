@@ -28,6 +28,8 @@ export interface SdlStreamsOptions {
   fontSize?: number;
   /** Override scale factor (null = auto-detect) */
   scaleFactor?: number | null;
+  /** Use system font instead of bundled Cozette font */
+  systemFont?: boolean;
 }
 
 /**

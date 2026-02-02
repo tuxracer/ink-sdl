@@ -11,6 +11,7 @@
  * Run with: npx tsx examples/hello.tsx
  * CLI options:
  *   --terminal              Render to terminal instead of SDL window
+ *   --system-font           Use system font instead of bundled Cozette
  *   --title <string>        Window title
  *   --width <number>        Window width in pixels
  *   --height <number>       Window height in pixels
@@ -31,6 +32,7 @@ const { values: args } = parseArgs({
     height: { type: "string" },
     "font-size": { type: "string" },
     "scale-factor": { type: "string" },
+    "system-font": { type: "boolean", default: false },
     terminal: { type: "boolean", default: false },
   },
 });
@@ -409,6 +411,7 @@ if (args.terminal) {
     scaleFactor: args["scale-factor"]
       ? parseFloat(args["scale-factor"])
       : undefined,
+    systemFont: args["system-font"],
   });
 
   const scaleFactor = renderer.getScaleFactor();
