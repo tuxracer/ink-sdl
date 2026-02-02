@@ -25,6 +25,7 @@ import {
   GLYPH_CACHE_EVICT_DIVISOR,
   PACK_RED_SHIFT,
   PACK_GREEN_SHIFT,
+  FALLBACK_FONTS,
 } from "./consts";
 
 /**
@@ -54,6 +55,7 @@ export class TextRenderer {
   private accessCounter = 0;
   private charWidth = 0;
   private charHeight = 0;
+  private currentFontPath: string | null = null;
 
   constructor(
     renderer: SDLPointer,
@@ -72,8 +74,8 @@ export class TextRenderer {
       this.ttf.init();
     }
 
-    // Load font
-    const fontPath = options.fontPath ?? this.getDefaultFontPath();
+    // Load font with fallback support
+    const fontPath = options.fontPath ?? this.findAvailableFont();
     this.loadFont(fontPath);
   }
 
@@ -148,6 +150,52 @@ export class TextRenderer {
   }
 
   /**
+   * Get fallback fonts for the current platform
+   */
+  private getFallbackFontPaths(): string[] {
+    const plat = platform();
+    if (plat === "darwin") {
+      return [...FALLBACK_FONTS.darwin];
+    }
+    if (plat === "linux") {
+      return [...FALLBACK_FONTS.linux];
+    }
+    if (plat === "win32") {
+      return [...FALLBACK_FONTS.win32];
+    }
+    return [];
+  }
+
+  /**
+   * Find an available font, trying default first then fallbacks
+   */
+  private findAvailableFont(): string {
+    // Try the default Cozette font first
+    const defaultPath = this.getDefaultFontPath();
+    try {
+      if (existsSync(defaultPath)) {
+        return defaultPath;
+      }
+    } catch {
+      // Continue to fallbacks
+    }
+
+    // Try platform-specific fallback fonts
+    for (const fallbackPath of this.getFallbackFontPaths()) {
+      try {
+        if (existsSync(fallbackPath)) {
+          return fallbackPath;
+        }
+      } catch {
+        // Continue to next fallback
+      }
+    }
+
+    // Return default path even if it doesn't exist - loadFont will handle the error
+    return defaultPath;
+  }
+
+  /**
    * Load a TTF font at the current scaled size
    */
   private loadFont(fontPath: string): void {
@@ -163,7 +211,20 @@ export class TextRenderer {
     // Scale by the display's scale factor so the font renders at native resolution
     // while maintaining the same visual size (e.g., 11pt stays 11pt visually)
     const physicalSize = Math.round(this.baseFontSize * this.scaleFactor);
-    this.font = this.ttf.openFont(fontPath, physicalSize);
+
+    try {
+      this.font = this.ttf.openFont(fontPath, physicalSize);
+      this.currentFontPath = fontPath;
+    } catch (error) {
+      // Provide a helpful error message
+      const fallbackPaths = this.getFallbackFontPaths();
+      const triedPaths = [fontPath, ...fallbackPaths].join("\n  - ");
+      throw new Error(
+        `Failed to load font: ${fontPath}\n` +
+          `Tried paths:\n  - ${triedPaths}\n` +
+          `Original error: ${error instanceof Error ? error.message : String(error)}`
+      );
+    }
 
     // Get character dimensions (use 'M' as reference)
     const dims = this.ttf.sizeText(this.font, "M");
@@ -181,8 +242,8 @@ export class TextRenderer {
 
     this.scaleFactor = scaleFactor;
 
-    // Reload font at new size
-    const fontPath = this.getDefaultFontPath();
+    // Reload font at new size using the current font path
+    const fontPath = this.currentFontPath ?? this.findAvailableFont();
     this.loadFont(fontPath);
   }
 
