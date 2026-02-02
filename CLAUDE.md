@@ -4,6 +4,8 @@ A library for rendering [Ink](https://github.com/vadimdemedes/ink) TUI applicati
 
 See [README.md](README.md) for installation prerequisites, API documentation, and usage examples. See [docs/TRD.md](docs/TRD.md) for technical details including architecture, ANSI sequence support, and keyboard input mapping.
 
+**Repository URL**: https://github.com/tuxracer/ink-sdl
+
 ## Source Structure
 
 Each module is a directory named after its primary export, containing `index.ts` and optionally `consts.ts` for module-specific constants:
