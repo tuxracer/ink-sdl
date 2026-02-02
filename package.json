@@ -16,7 +16,7 @@
   },
   "files": [
     "dist",
-    "src/fonts"
+    "fonts"
   ],
   "scripts": {
     "dev": "tsx src/index.ts",
