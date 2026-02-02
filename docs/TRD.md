@@ -169,11 +169,18 @@ const { stdin, stdout, window } = createSdlStreams({
   width: 800,           // Logical width in pixels
   height: 600,          // Logical height in pixels
   title: "My App",      // Window title
+  fullscreen: false,    // "desktop" for borderless fullscreen
+  borderless: false,    // Remove window decorations
+  minWidth: 400,        // Minimum window width
+  minHeight: 300,       // Minimum window height
 
   // Rendering configuration
   fontSize: 16,         // Font size in points
-  fontPath: undefined,  // Custom font path (optional)
+  fontPath: undefined,  // Custom TTF font path
+  fontName: undefined,  // Font name to find in system dirs
+  systemFont: false,    // Use system monospace font
   scaleFactor: null,    // null = auto-detect HiDPI
+  backgroundColor: [0, 0, 0], // RGB tuple or "#RRGGBB" hex
 
   // SDL options
   vsync: true,          // Enable VSync
@@ -237,16 +244,22 @@ interface SdlStreamsOptions {
   // Window
   width?: number; // Default: 800
   height?: number; // Default: 600
-  title?: string; // Default: "Ink SDL"
+  title?: string; // Default: "ink-sdl"
+  fullscreen?: boolean | "desktop"; // Fullscreen mode (true = exclusive, "desktop" = borderless)
+  borderless?: boolean; // Remove window decorations
+  minWidth?: number; // Minimum window width in pixels
+  minHeight?: number; // Minimum window height in pixels
 
   // Rendering
-  fontSize?: number; // Default: 14
-  fontPath?: string; // Default: bundled Cozette font
-  scaleFactor?: number | null; // null = auto-detect
+  fontSize?: number; // Default: 16
+  fontPath?: string; // Path to custom TTF font file
+  fontName?: string; // Font name to find in system directories
+  systemFont?: boolean; // Use system monospace font instead of Cozette
+  scaleFactor?: number | null; // null = auto-detect HiDPI
+  backgroundColor?: [number, number, number] | string; // RGB tuple or hex "#RRGGBB"
 
   // Behavior
   vsync?: boolean; // Default: true
-  exitOnClose?: boolean; // Default: true (exit process on window close)
 }
 ```
 
@@ -456,7 +469,10 @@ Each module is a directory named after its primary export, containing `index.ts`
 ink-sdl/
 ├── src/
 │   ├── index.ts                # Public API exports
+│   ├── cli.tsx                 # CLI entry point (npx ink-sdl)
 │   ├── consts.ts               # Shared constants
+│   ├── Demo/
+│   │   └── index.tsx           # Shared demo components (DemoApp)
 │   ├── SdlWindow/
 │   │   ├── index.ts            # createSdlStreams(), SdlWindow
 │   │   └── consts.ts
@@ -486,14 +502,36 @@ ink-sdl/
 │       └── index.ts            # FFI bindings to SDL2_ttf via koffi
 ├── fonts/
 │   └── CozetteVector.ttf       # Bundled font
-├── examples/
-│   └── ...                     # Example applications
 ├── docs/
 │   └── TRD.md
 ├── package.json
 ├── tsconfig.json
 └── README.md
 ```
+
+## CLI Demo
+
+The package includes a built-in demo that can be run directly:
+
+```bash
+# Run the demo (installs and executes)
+npx ink-sdl
+# or
+pnpm dlx ink-sdl
+
+# With options
+npx ink-sdl --font-size 20 --background "#1a1a2e"
+npx ink-sdl --fullscreen desktop
+npx ink-sdl --font-name Menlo
+```
+
+For local development:
+
+```bash
+pnpm demo
+```
+
+The demo showcases text styles, colors (16, 256, and RGB), box layouts, and dynamic updates.
 
 ## Usage Examples
 
@@ -558,7 +596,7 @@ const { stdin, stdout } = createSdlStreams({
 1. **Mouse support**: Map SDL mouse events to terminal mouse sequences
 2. **Clipboard integration**: SDL clipboard ↔ terminal paste
 3. **Multiple windows**: Support for multi-window Ink applications
-4. **Custom themes**: Background colors, cursor styles
+4. **Custom cursor styles**: Block, underline, bar cursor options
 5. **Screen recording**: Built-in GIF/video capture
 6. **Accessibility**: Screen reader integration
 
