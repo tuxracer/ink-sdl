@@ -68,7 +68,7 @@ Options:
   --min-height <number>   Minimum window height in pixels
   -h, --help              Show this help message
 
-For library usage, see: https://github.com/anthropics/ink-sdl
+For library usage, see: https://github.com/tuxracer/ink-sdl
 `);
   process.exit(0);
 }
