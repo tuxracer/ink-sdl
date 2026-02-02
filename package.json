@@ -1,6 +1,6 @@
 {
   "name": "ink-sdl",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Render Ink terminal apps in native SDL windows",
   "type": "module",
   "main": "dist/index.js",
