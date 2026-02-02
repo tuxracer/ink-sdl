@@ -120,12 +120,9 @@ export class TextRenderer {
     this.clearCache();
 
     // Calculate physical font size for HiDPI
-    // Apply scaleFactor twice:
-    // 1. Once to increase logical size (so UI is larger on HiDPI displays)
-    // 2. Once for physical pixel density (for crisp rendering)
-    const physicalSize = Math.round(
-      this.baseFontSize * this.scaleFactor * this.scaleFactor
-    );
+    // Scale by the display's scale factor so the font renders at native resolution
+    // while maintaining the same visual size (e.g., 11pt stays 11pt visually)
+    const physicalSize = Math.round(this.baseFontSize * this.scaleFactor);
     this.font = this.ttf.openFont(fontPath, physicalSize);
 
     // Get character dimensions (use 'M' as reference)
