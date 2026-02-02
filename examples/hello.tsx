@@ -2,11 +2,28 @@
  * Interactive demo for ink-sdl
  *
  * Run with: npx tsx examples/hello.tsx
+ * CLI options:
+ *   --title <string>        Window title
+ *   --width <number>        Window width in pixels
+ *   --height <number>       Window height in pixels
+ *   --font-size <number>    Font size in points
+ *   --scale-factor <number> Scale factor (omit for auto-detect)
  */
 
+import { parseArgs } from "node:util";
 import React, { useState, useEffect } from "react";
 import { render, Text, Box, useInput } from "ink";
 import { createSdlStreams } from "../src";
+
+const { values: args } = parseArgs({
+  options: {
+    title: { type: "string" },
+    width: { type: "string" },
+    height: { type: "string" },
+    "font-size": { type: "string" },
+    "scale-factor": { type: "string" },
+  },
+});
 
 const MENU_ITEMS = [
   { label: "New Game", description: "Start a new adventure" },
@@ -35,7 +52,11 @@ const App = () => {
     } else if (key.downArrow) {
       setSelectedIndex((i) => (i < MENU_ITEMS.length - 1 ? i + 1 : 0));
     } else if (key.return) {
-      // Handle selection (just for demo, doesn't do anything)
+      const selected = MENU_ITEMS[selectedIndex];
+      if (selected?.label === "Exit") {
+        window.close();
+        process.exit(0);
+      }
     }
   });
 
@@ -74,16 +95,29 @@ const App = () => {
       <Box marginTop={1}>
         <Text dimColor>Use arrow keys to navigate, Ctrl+C to exit</Text>
       </Box>
+
+      <Box marginTop={1} flexDirection="column">
+        <Text dimColor>
+          Scale: {scaleFactor.toFixed(2)}x | Font:{" "}
+          {args["font-size"] ?? "default"}pt
+        </Text>
+      </Box>
     </Box>
   );
 };
 
-// Create SDL streams
-const { stdin, stdout, window } = createSdlStreams({
-  title: "ink-sdl Hello World",
-  width: 640,
-  height: 480,
+// Create SDL streams with CLI options
+const { stdin, stdout, window, renderer } = createSdlStreams({
+  title: args.title ?? "ink-sdl Hello World",
+  width: args.width ? parseInt(args.width, 10) : 640,
+  height: args.height ? parseInt(args.height, 10) : 480,
+  fontSize: args["font-size"] ? parseInt(args["font-size"], 10) : undefined,
+  scaleFactor: args["scale-factor"]
+    ? parseFloat(args["scale-factor"])
+    : undefined,
 });
+
+const scaleFactor = renderer.getScaleFactor();
 
 // Render the app
 render(<App />, { stdin, stdout });

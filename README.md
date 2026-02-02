@@ -55,6 +55,27 @@ pnpm install
 pnpm exec tsx examples/hello.tsx
 ```
 
+The example supports CLI flags for testing different display settings:
+
+```bash
+# Custom font size
+pnpm exec tsx examples/hello.tsx --font-size 20
+
+# Override scale factor (useful for HiDPI testing)
+pnpm exec tsx examples/hello.tsx --scale-factor 2.0
+
+# All options
+pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-size 18 --scale-factor 1.5
+```
+
+| Flag             | Description                         |
+| ---------------- | ----------------------------------- |
+| `--title`        | Window title                        |
+| `--width`        | Window width in pixels              |
+| `--height`       | Window height in pixels             |
+| `--font-size`    | Font size in points                 |
+| `--scale-factor` | Scale factor (omit for auto-detect) |
+
 > **Note:** This project uses [pnpm](https://pnpm.io/) for development. You can install and use ink-sdl in your own project with npm or pnpm, but if you're contributing to the library itself, use pnpm.
 
 ## Usage
@@ -114,7 +135,7 @@ Creates stdin/stdout streams and a window for use with Ink.
 | `width`       | `number`         | `800`       | Window width in pixels                     |
 | `height`      | `number`         | `600`       | Window height in pixels                    |
 | `vsync`       | `boolean`        | `true`      | Enable vertical sync                       |
-| `fontSize`    | `number`         | `11`        | Font size in points                        |
+| `fontSize`    | `number`         | `16`        | Font size in points                        |
 | `scaleFactor` | `number \| null` | `null`      | Override scale factor (null = auto-detect) |
 
 #### Returns
@@ -124,6 +145,7 @@ Creates stdin/stdout streams and a window for use with Ink.
   stdin: SdlInputStream; // Readable stream for keyboard input
   stdout: SdlOutputStream; // Writable stream for ANSI output
   window: SdlWindow; // Window wrapper with events
+  renderer: SdlUiRenderer; // UI renderer (for advanced use)
 }
 ```
 

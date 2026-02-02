@@ -160,6 +160,8 @@ export interface SdlStreams {
   stdout: SdlOutputStream;
   /** SDL window wrapper with events */
   window: SdlWindow;
+  /** UI renderer (for advanced use) */
+  renderer: SdlUiRenderer;
 }
 
 /**
@@ -206,6 +208,7 @@ export const createSdlStreams = (
     stdin: inputStream,
     stdout: outputStream,
     window,
+    renderer,
   };
 };
 
