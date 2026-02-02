@@ -1,18 +1,16 @@
 /**
- * SDL Streams for Ink
+ * SDL Window and Streams for Ink
  *
  * Factory function to create stdin/stdout streams that render to SDL.
  */
 
 import { EventEmitter } from "events";
 import { pickBy, isDefined } from "remeda";
-import { SdlUiRenderer, type SdlUiRendererOptions } from "../renderer";
-import { SdlOutputStream } from "./output-stream";
-import { SdlInputStream } from "./input-stream";
+import { SdlUiRenderer, type SdlUiRendererOptions } from "../SdlUiRenderer";
+import { SdlOutputStream } from "../SdlOutputStream";
+import { SdlInputStream } from "../SdlInputStream";
 import { getSDL2 } from "../sdl";
-
-/** Event loop interval in ms (~60 fps) */
-const EVENT_LOOP_INTERVAL_MS = 16;
+import { EVENT_LOOP_INTERVAL_MS } from "./consts";
 
 /**
  * Options for creating SDL streams
@@ -211,7 +209,3 @@ export const createSdlStreams = (
     renderer,
   };
 };
-
-// Re-export stream classes
-export { SdlOutputStream } from "./output-stream";
-export { SdlInputStream } from "./input-stream";

@@ -5,7 +5,7 @@
 /* eslint-disable @typescript-eslint/no-magic-numbers */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { AnsiParser } from "./ansi-parser";
+import { AnsiParser } from ".";
 
 describe("AnsiParser", () => {
   let parser: AnsiParser;

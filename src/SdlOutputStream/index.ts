@@ -7,11 +7,8 @@
 
 import { Writable } from "stream";
 import { isString } from "remeda";
-import type { SdlUiRenderer } from "../renderer";
-
-/** Default terminal dimensions */
-const DEFAULT_COLUMNS = 80;
-const DEFAULT_ROWS = 24;
+import type { SdlUiRenderer } from "../SdlUiRenderer";
+import { DEFAULT_COLUMNS, DEFAULT_ROWS } from "../SdlUiRenderer/consts";
 
 /**
  * SDL Output Stream

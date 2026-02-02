@@ -16,13 +16,15 @@ import {
   SDL_BLENDMODE_BLEND,
 } from "../sdl";
 import type { SDLPointer } from "../sdl";
-import type { Color } from "./ansi-parser";
+import type { Color } from "../AnsiParser";
 import {
   COLOR_CHANNEL_MAX,
   DEFAULT_FONT_SIZE,
+  SCALE_FACTOR_EPSILON,
+} from "../consts";
+import {
   MAX_GLYPH_CACHE_SIZE,
   GLYPH_CACHE_EVICT_DIVISOR,
-  SCALE_FACTOR_EPSILON,
   PACK_RED_SHIFT,
   PACK_GREEN_SHIFT,
 } from "./consts";

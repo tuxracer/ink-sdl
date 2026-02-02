@@ -5,8 +5,8 @@
  * for rendering in an SDL window.
  */
 
+import { COLOR_CHANNEL_MAX } from "../consts";
 import {
-  COLOR_CHANNEL_MAX,
   ANSI_STANDARD_COLOR_COUNT,
   ANSI_TAB_WIDTH,
   ANSI_ERASE_ENTIRE_SCREEN,

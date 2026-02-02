@@ -6,11 +6,18 @@ See [README.md](README.md) for installation prerequisites, API documentation, an
 
 ## Source Structure
 
-- `src/streams/` - Main API (`createSdlStreams`), SdlWindow, input/output streams
-- `src/renderer/` - ANSI parsing (`AnsiParser`) and SDL rendering (`SdlUiRenderer`, `TextRenderer`)
-- `src/input/` - Keyboard input conversion (`InputBridge`: SDL keycodes → terminal sequences)
+Each module is a directory named after its primary export, containing `index.ts` and optionally `consts.ts` for module-specific constants:
+
+- `src/SdlWindow/` - Main API (`createSdlStreams`, `SdlWindow`)
+- `src/SdlInputStream/` - Readable stream for keyboard input
+- `src/SdlOutputStream/` - Writable stream for ANSI output
+- `src/SdlUiRenderer/` - SDL window and rendering management
+- `src/AnsiParser/` - ANSI escape sequence parsing
+- `src/TextRenderer/` - TTF font loading and glyph caching
+- `src/InputBridge/` - SDL keycodes → terminal sequences
 - `src/sdl/` - FFI bindings to SDL2/SDL2_ttf via koffi
 - `src/fonts/` - Bundled Cozette font
+- `src/consts.ts` - Shared constants used across modules
 - `examples/` - Example applications
 
 ## Commands
@@ -47,8 +54,8 @@ pnpm check      # Format, lint, and typecheck (run before commits)
   src/
     TitleScreen/
       index.ts       # exports showTitleScreen()
+      index.test.ts  # tests for the module
       consts.ts      # LOGO, PROMPT_TEXT, etc.
-      TitleScreen.test.ts
     Game/
       index.ts       # exports Game class
       consts.ts      # TICK_RATE, MAX_SPEED, etc.
@@ -59,6 +66,12 @@ pnpm check      # Format, lint, and typecheck (run before commits)
     TitleScreen.ts
     Game.ts
   ```
+
+  Standard files within a module directory:
+  - `index.ts` - Main module implementation and exports
+  - `index.test.ts` - Tests for the module
+  - `consts.ts` - Module-specific constants
+  - `types.ts` - Module-specific type definitions (if needed)
 
 - **Avoid re-exports**: Don't re-export from index.ts or create barrel files. Re-exports obscure where code actually lives, create unnecessary coupling between modules, and make it harder to trace imports. Import directly from the source file:
 

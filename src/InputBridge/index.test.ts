@@ -3,7 +3,7 @@
  */
 
 import { describe, it, expect, beforeEach } from "vitest";
-import { InputBridge } from "./input-bridge";
+import { InputBridge } from ".";
 import {
   SDLK_RETURN,
   SDLK_ESCAPE,

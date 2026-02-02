@@ -24,21 +24,23 @@ import {
   createSDLRect,
 } from "../sdl";
 import type { SDLPointer, SdlKeyEvent } from "../sdl";
-import { AnsiParser, type DrawCommand, type Color } from "./ansi-parser";
-import { TextRenderer } from "./text-renderer";
-import { InputBridge } from "../input/input-bridge";
+import { AnsiParser, type DrawCommand, type Color } from "../AnsiParser";
+import { TextRenderer } from "../TextRenderer";
+import { InputBridge } from "../InputBridge";
 import {
   COLOR_CHANNEL_MAX,
+  DEFAULT_FONT_SIZE,
+  SCALE_FACTOR_EPSILON,
+} from "../consts";
+import {
   DEFAULT_WINDOW_WIDTH,
   DEFAULT_WINDOW_HEIGHT,
   DEFAULT_COLUMNS,
   DEFAULT_ROWS,
   MIN_COLUMNS,
   MIN_ROWS,
-  DEFAULT_FONT_SIZE,
   BOLD_BRIGHTNESS_MULTIPLIER,
   DIM_BRIGHTNESS_MULTIPLIER,
-  SCALE_FACTOR_EPSILON,
 } from "./consts";
 
 /** Default background color (black) */
@@ -599,7 +601,3 @@ export class SdlUiRenderer {
     }
   }
 }
-
-// Re-export types
-export { AnsiParser, type DrawCommand, type Color } from "./ansi-parser";
-export { TextRenderer } from "./text-renderer";

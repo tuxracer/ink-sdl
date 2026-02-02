@@ -32,30 +32,24 @@ import {
   ASCII_Z_LOWER,
 } from "../sdl/consts";
 import type { SdlKeyEvent } from "../sdl/types";
-
-/** ASCII printable range */
-const ASCII_PRINTABLE_START = 32;
-const ASCII_PRINTABLE_END = 126;
-
-/** Ctrl key offset (Ctrl+A = 1) */
-const CTRL_KEY_OFFSET = 96;
-
-/** ASCII special characters for Ctrl combinations */
-const ASCII_BRACKET_OPEN = 91;
-const ASCII_BACKSLASH = 92;
-const ASCII_BRACKET_CLOSE = 93;
-const ASCII_CARET = 94;
-const ASCII_UNDERSCORE = 95;
-
-/** Function key offsets */
-const FUNCTION_KEY_OFFSET_3 = 3;
-const FUNCTION_KEY_OFFSET_4 = 4;
-const FUNCTION_KEY_OFFSET_5 = 5;
-const FUNCTION_KEY_OFFSET_6 = 6;
-const FUNCTION_KEY_OFFSET_7 = 7;
-const FUNCTION_KEY_OFFSET_8 = 8;
-const FUNCTION_KEY_OFFSET_9 = 9;
-const FUNCTION_KEY_OFFSET_10 = 10;
+import {
+  ASCII_PRINTABLE_START,
+  ASCII_PRINTABLE_END,
+  CTRL_KEY_OFFSET,
+  ASCII_BRACKET_OPEN,
+  ASCII_BACKSLASH,
+  ASCII_BRACKET_CLOSE,
+  ASCII_CARET,
+  ASCII_UNDERSCORE,
+  FUNCTION_KEY_OFFSET_3,
+  FUNCTION_KEY_OFFSET_4,
+  FUNCTION_KEY_OFFSET_5,
+  FUNCTION_KEY_OFFSET_6,
+  FUNCTION_KEY_OFFSET_7,
+  FUNCTION_KEY_OFFSET_8,
+  FUNCTION_KEY_OFFSET_9,
+  FUNCTION_KEY_OFFSET_10,
+} from "./consts";
 
 /**
  * Terminal-style key event for Ink

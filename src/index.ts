@@ -32,9 +32,9 @@ export {
   type SdlStreamsOptions,
   type SdlStreams,
   SdlWindow,
-  SdlOutputStream,
-  SdlInputStream,
-} from "./streams";
+} from "./SdlWindow";
+export { SdlOutputStream } from "./SdlOutputStream";
+export { SdlInputStream } from "./SdlInputStream";
 
 // SDL availability check
 import { isSDL2Available, isSDL_ttfAvailable } from "./sdl";
@@ -52,14 +52,10 @@ export const isSdlAvailable = (): boolean => {
 };
 
 // Advanced exports for custom implementations
-export { SdlUiRenderer, type SdlUiRendererOptions } from "./renderer";
-export {
-  AnsiParser,
-  type Color,
-  type DrawCommand,
-} from "./renderer/ansi-parser";
-export { TextRenderer } from "./renderer/text-renderer";
-export { InputBridge, type InkKeyEvent } from "./input/input-bridge";
+export { SdlUiRenderer, type SdlUiRendererOptions } from "./SdlUiRenderer";
+export { AnsiParser, type Color, type DrawCommand } from "./AnsiParser";
+export { TextRenderer } from "./TextRenderer";
+export { InputBridge, type InkKeyEvent } from "./InputBridge";
 
 // SDL bindings (for advanced use)
 export {
