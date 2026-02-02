@@ -9,7 +9,7 @@ import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
 import { platform, homedir } from "os";
-import { sortBy, take } from "remeda";
+import { flatMap, sortBy, take } from "remeda";
 import { getSdl2, createSDLRect, SDL_BLENDMODE_BLEND } from "../Sdl2";
 import { getSdlTtf, TTF_STYLE_NORMAL, TTF_STYLE_ITALIC } from "../SdlTtf";
 import type { SDLPointer } from "../Sdl2";
@@ -174,17 +174,13 @@ export class TextRenderer {
     const extensions = [".ttf", ".ttc", ".otf", ".TTC", ".TTF", ".OTF"];
     const directories = this.getSystemFontDirectories();
 
-    for (const dir of directories) {
-      for (const ext of extensions) {
-        const fontPath = join(dir, `${fontName}${ext}`);
-        try {
-          if (existsSync(fontPath)) {
-            return fontPath;
-          }
-        } catch {
-          // Continue to next path
-        }
-      }
+    const paths = flatMap(directories, (dir) =>
+      extensions.map((ext) => join(dir, `${fontName}${ext}`))
+    );
+
+    const fontPath = findFirstExisting(paths);
+    if (fontPath) {
+      return fontPath;
     }
 
     // If not found, throw a helpful error
