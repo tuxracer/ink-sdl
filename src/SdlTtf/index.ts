@@ -81,6 +81,7 @@ export class SdlTtf {
   ) => number;
   private _TTF_SetFontStyle!: (font: SDLPointer, style: number) => void;
   private _TTF_GetFontStyle!: (font: SDLPointer) => number;
+  private _TTF_GlyphIsProvided32!: (font: SDLPointer, ch: number) => number;
 
   constructor() {
     const libPath = findSDLTtfLibrary();
@@ -137,6 +138,9 @@ export class SdlTtf {
       "void TTF_SetFontStyle(void* font, int style)"
     );
     this._TTF_GetFontStyle = this.lib.func("int TTF_GetFontStyle(void* font)");
+    this._TTF_GlyphIsProvided32 = this.lib.func(
+      "int TTF_GlyphIsProvided32(void* font, uint32_t ch)"
+    );
   }
 
   /**
@@ -245,6 +249,13 @@ export class SdlTtf {
    */
   getFontStyle(font: SDLPointer): number {
     return this._TTF_GetFontStyle(font);
+  }
+
+  /**
+   * Check if a font provides a glyph for the given Unicode codepoint
+   */
+  glyphIsProvided(font: SDLPointer, codepoint: number): boolean {
+    return this._TTF_GlyphIsProvided32(font, codepoint) !== 0;
   }
 }
 

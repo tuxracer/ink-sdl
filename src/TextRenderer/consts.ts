@@ -40,3 +40,27 @@ export const FALLBACK_FONTS = {
     "C:\\Windows\\Fonts\\lucon.ttf",
   ],
 } as const;
+
+/**
+ * Emoji fallback fonts by platform
+ *
+ * These fonts are used when the primary font doesn't have a glyph.
+ */
+export const EMOJI_FONTS = {
+  darwin: ["/System/Library/Fonts/Apple Color Emoji.ttc"],
+  linux: [
+    "/usr/share/fonts/truetype/noto/NotoColorEmoji.ttf",
+    "/usr/share/fonts/noto-emoji/NotoColorEmoji.ttf",
+    "/usr/share/fonts/truetype/twitter-color-emoji/TwitterColorEmoji-SVGinOT.ttf",
+    "/usr/share/fonts/google-noto-emoji/NotoColorEmoji.ttf",
+  ],
+  win32: ["C:\\Windows\\Fonts\\seguiemj.ttf"],
+} as const;
+
+/**
+ * Scale factor for emoji font size relative to primary font
+ *
+ * Emoji fonts often render larger than text fonts at the same point size.
+ * This factor scales down the emoji font to better match the primary font's metrics.
+ */
+export const EMOJI_FONT_SCALE = 0.75;

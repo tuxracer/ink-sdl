@@ -26,6 +26,8 @@ import {
   PACK_RED_SHIFT,
   PACK_GREEN_SHIFT,
   FALLBACK_FONTS,
+  EMOJI_FONTS,
+  EMOJI_FONT_SCALE,
 } from "./consts";
 
 /**
@@ -48,6 +50,7 @@ export class TextRenderer {
   private sdl = getSdl2();
   private ttf = getSdlTtf();
   private font: SDLPointer | null = null;
+  private fallbackFont: SDLPointer | null = null;
   private renderer: SDLPointer;
   private baseFontSize: number;
   private scaleFactor: number;
@@ -81,6 +84,9 @@ export class TextRenderer {
       options.fontPath ??
       (options.systemFont ? this.findSystemFont() : this.findAvailableFont());
     this.loadFont(fontPath);
+
+    // Load fallback emoji font if available
+    this.loadFallbackFont();
   }
 
   /**
@@ -219,6 +225,66 @@ export class TextRenderer {
   }
 
   /**
+   * Get emoji font paths for the current platform
+   */
+  private getEmojiFontPaths(): string[] {
+    const plat = platform();
+    if (plat === "darwin") {
+      return [...EMOJI_FONTS.darwin];
+    }
+    if (plat === "linux") {
+      return [...EMOJI_FONTS.linux];
+    }
+    if (plat === "win32") {
+      return [...EMOJI_FONTS.win32];
+    }
+    return [];
+  }
+
+  /**
+   * Find an available emoji font
+   */
+  private findEmojiFont(): string | null {
+    for (const fontPath of this.getEmojiFontPaths()) {
+      try {
+        if (existsSync(fontPath)) {
+          return fontPath;
+        }
+      } catch {
+        // Continue to next path
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Load the fallback emoji font if available
+   */
+  private loadFallbackFont(): void {
+    if (this.fallbackFont) {
+      this.ttf.closeFont(this.fallbackFont);
+      this.fallbackFont = null;
+    }
+
+    const emojiFontPath = this.findEmojiFont();
+    if (!emojiFontPath) {
+      return;
+    }
+
+    // Scale emoji font size to better match primary font metrics
+    const physicalSize = Math.round(
+      this.baseFontSize * this.scaleFactor * EMOJI_FONT_SCALE
+    );
+
+    try {
+      this.fallbackFont = this.ttf.openFont(emojiFontPath, physicalSize);
+    } catch {
+      // Emoji font failed to load, continue without it
+      this.fallbackFont = null;
+    }
+  }
+
+  /**
    * Load a TTF font at the current scaled size
    */
   private loadFont(fontPath: string): void {
@@ -268,6 +334,9 @@ export class TextRenderer {
     // Reload font at new size using the current font path
     const fontPath = this.currentFontPath ?? this.findAvailableFont();
     this.loadFont(fontPath);
+
+    // Reload fallback font at new size
+    this.loadFallbackFont();
   }
 
   /**
@@ -317,17 +386,32 @@ export class TextRenderer {
     }
 
     try {
-      // Apply font style for italic
-      const currentStyle = this.ttf.getFontStyle(this.font);
-      const targetStyle = italic ? TTF_STYLE_ITALIC : TTF_STYLE_NORMAL;
-      if (currentStyle !== targetStyle) {
-        this.ttf.setFontStyle(this.font, targetStyle);
+      // Get the Unicode codepoint for the character
+      const codepoint = char.codePointAt(0) ?? 0;
+
+      // Choose font: use fallback if primary doesn't have the glyph
+      let fontToUse = this.font;
+      if (
+        this.fallbackFont &&
+        !this.ttf.glyphIsProvided(this.font, codepoint) &&
+        this.ttf.glyphIsProvided(this.fallbackFont, codepoint)
+      ) {
+        fontToUse = this.fallbackFont;
+      }
+
+      // Apply font style for italic (only for primary font)
+      if (fontToUse === this.font) {
+        const currentStyle = this.ttf.getFontStyle(this.font);
+        const targetStyle = italic ? TTF_STYLE_ITALIC : TTF_STYLE_NORMAL;
+        if (currentStyle !== targetStyle) {
+          this.ttf.setFontStyle(this.font, targetStyle);
+        }
       }
 
       // Render text to surface with WHITE color
       // We'll apply the actual color via texture color mod
       const surface = this.ttf.renderTextBlended(
-        this.font,
+        fontToUse,
         char,
         COLOR_CHANNEL_MAX, // White
         COLOR_CHANNEL_MAX,
@@ -345,7 +429,7 @@ export class TextRenderer {
       this.sdl.setTextureColorMod(texture, r, g, b);
 
       // Get surface dimensions from rendered text
-      const dims = this.ttf.sizeText(this.font, char);
+      const dims = this.ttf.sizeText(fontToUse, char);
 
       // Free surface (texture now owns the pixel data)
       this.sdl.freeSurface(surface);
@@ -404,7 +488,21 @@ export class TextRenderer {
       return;
     }
 
-    const destRect = createSDLRect(x, y, glyph.width, glyph.height);
+    // Scale oversized glyphs (e.g., emoji) to fit within character cell
+    let destWidth = glyph.width;
+    let destHeight = glyph.height;
+    let destX = x;
+    const destY = y;
+
+    if (glyph.height > this.charHeight) {
+      const scale = this.charHeight / glyph.height;
+      destWidth = Math.round(glyph.width * scale);
+      destHeight = this.charHeight;
+      // Center horizontally within character cell
+      destX = x + Math.round((this.charWidth - destWidth) / 2);
+    }
+
+    const destRect = createSDLRect(destX, destY, destWidth, destHeight);
     this.sdl.renderCopy(this.renderer, glyph.texture, null, destRect);
   }
 
@@ -470,6 +568,10 @@ export class TextRenderer {
     if (this.font) {
       this.ttf.closeFont(this.font);
       this.font = null;
+    }
+    if (this.fallbackFont) {
+      this.ttf.closeFont(this.fallbackFont);
+      this.fallbackFont = null;
     }
   }
 }
