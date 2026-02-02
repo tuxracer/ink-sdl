@@ -64,12 +64,18 @@ export class SdlWindow extends EventEmitter {
       }
 
       // Process SDL events
-      const { keyEvents, resized } = this.renderer.processEvents();
+      const { keyEvents, resized, focusLost } = this.renderer.processEvents();
 
       // Notify Ink of resize so it can re-render with new dimensions
       if (resized) {
         this.outputStream.notifyResize();
         this.emit("resize", this.renderer.getDimensions());
+      }
+
+      // Reset modifier keys when focus is lost to prevent "stuck" keys
+      if (focusLost) {
+        this.renderer.resetInputState();
+        this.emit("blur");
       }
 
       // Convert key events to terminal sequences
@@ -157,6 +163,23 @@ export class SdlWindow extends EventEmitter {
    */
   getOutputStream(): SdlOutputStream {
     return this.outputStream;
+  }
+
+  /**
+   * Get glyph cache statistics
+   *
+   * Useful for profiling and tuning cache performance.
+   *
+   * @example
+   * ```typescript
+   * const stats = window.getCacheStats();
+   * if (stats) {
+   *   console.log(`Cache: ${stats.size}/${stats.maxSize} glyphs`);
+   * }
+   * ```
+   */
+  getCacheStats(): { size: number; maxSize: number } | null {
+    return this.renderer.getCacheStats();
   }
 }
 

@@ -97,6 +97,12 @@ export const SDL_WINDOWEVENT_RESIZED = 5;
 /** Window size has changed */
 export const SDL_WINDOWEVENT_SIZE_CHANGED = 6;
 
+/** Window has gained keyboard focus */
+export const SDL_WINDOWEVENT_FOCUS_GAINED = 12;
+
+/** Window has lost keyboard focus */
+export const SDL_WINDOWEVENT_FOCUS_LOST = 13;
+
 /** Window close button clicked */
 export const SDL_WINDOWEVENT_CLOSE = 14;
 

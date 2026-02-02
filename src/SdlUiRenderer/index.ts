@@ -19,6 +19,7 @@ import {
   SDL_WINDOWEVENT,
   SDL_WINDOWEVENT_CLOSE,
   SDL_WINDOWEVENT_SIZE_CHANGED,
+  SDL_WINDOWEVENT_FOCUS_LOST,
   SDL_KEYDOWN,
   SDL_KEYUP,
   createSDLRect,
@@ -67,6 +68,8 @@ export interface ProcessEventsResult {
   keyEvents: SdlKeyEvent[];
   /** Whether a resize event occurred */
   resized: boolean;
+  /** Whether focus was lost (modifier keys should be reset) */
+  focusLost: boolean;
 }
 
 /**
@@ -429,6 +432,7 @@ export class SdlUiRenderer {
   processEvents(): ProcessEventsResult {
     const keyEvents: SdlKeyEvent[] = [];
     let resized = false;
+    let focusLost = false;
 
     let event = this.sdl.pollEvent();
     while (event) {
@@ -440,6 +444,8 @@ export class SdlUiRenderer {
         } else if (event.windowEvent === SDL_WINDOWEVENT_SIZE_CHANGED) {
           this.handleResize();
           resized = true;
+        } else if (event.windowEvent === SDL_WINDOWEVENT_FOCUS_LOST) {
+          focusLost = true;
         }
       } else if (event.type === SDL_KEYDOWN || event.type === SDL_KEYUP) {
         if (event.keycode !== undefined && event.pressed !== undefined) {
@@ -454,7 +460,7 @@ export class SdlUiRenderer {
       event = this.sdl.pollEvent();
     }
 
-    return { keyEvents, resized };
+    return { keyEvents, resized, focusLost };
   }
 
   /**
@@ -609,5 +615,23 @@ export class SdlUiRenderer {
       this.windowHeight = size.height;
       this.updateTerminalDimensions();
     }
+  }
+
+  /**
+   * Reset input state (modifier keys)
+   *
+   * Call this when focus is lost to prevent "stuck" modifier keys.
+   */
+  resetInputState(): void {
+    this.inputBridge.reset();
+  }
+
+  /**
+   * Get glyph cache statistics
+   *
+   * Useful for profiling and tuning cache size.
+   */
+  getCacheStats(): { size: number; maxSize: number } | null {
+    return this.textRenderer?.getCacheStats() ?? null;
   }
 }
