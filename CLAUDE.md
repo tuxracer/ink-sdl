@@ -55,6 +55,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
 - **Remeda utilities**: Prefer for array/object manipulation over manual loops
 - **Named constants**: Use `const HEADER_SIZE = 16` not magic numbers
 - **Numeric separators**: Use underscore separators for numbers 1000 and above for readability (`1_500`, `44_100`, `100_000`)
+- **DRY (Don't Repeat Yourself)**: When a pattern appears 3+ times, extract it into a helper function. Place shared utilities in `src/utils/` (e.g., `src/utils/findLibrary/index.ts`). This improves readability and maintainability without impacting performance
 - **Module structure**: Always create modules as directories with `index.ts`, never as single `moduleName.ts` files. Name the directory after the primary export (class, function, or concept). This provides a consistent location for related files:
 
   ```
