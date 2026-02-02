@@ -27,7 +27,8 @@
     "lint:fix": "eslint src/ --fix",
     "format": "prettier --write src/",
     "test": "vitest",
-    "check": "prettier --write src/ && eslint src/ --fix && tsc --noEmit"
+    "check": "prettier --write src/ && eslint src/ --fix && tsc --noEmit",
+    "prepublishOnly": "pnpm run build"
   },
   "keywords": [
     "terminal",
