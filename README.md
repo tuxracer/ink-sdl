@@ -44,6 +44,17 @@ npm install ink-sdl
 pnpm add ink-sdl
 ```
 
+## Demo
+
+To run the included example:
+
+```bash
+git clone https://github.com/anthropics/ink-sdl.git
+cd ink-sdl
+pnpm install
+pnpm exec tsx examples/hello.tsx
+```
+
 ## Usage
 
 ```tsx
