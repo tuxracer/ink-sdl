@@ -66,6 +66,7 @@ export class TextRenderer {
       fontSize?: number;
       scaleFactor?: number;
       fontPath?: string;
+      fontName?: string;
       systemFont?: boolean;
     } = {}
   ) {
@@ -79,10 +80,17 @@ export class TextRenderer {
     }
 
     // Load font with fallback support
-    // If systemFont is true, skip the default Cozette font and use system fonts
-    const fontPath =
-      options.fontPath ??
-      (options.systemFont ? this.findSystemFont() : this.findAvailableFont());
+    // Priority: fontPath > fontName > systemFont > default (Cozette)
+    let fontPath: string;
+    if (options.fontPath) {
+      fontPath = options.fontPath;
+    } else if (options.fontName) {
+      fontPath = this.findFontByName(options.fontName);
+    } else if (options.systemFont) {
+      fontPath = this.findSystemFont();
+    } else {
+      fontPath = this.findAvailableFont();
+    }
     this.loadFont(fontPath);
 
     // Load fallback emoji font if available
@@ -92,32 +100,73 @@ export class TextRenderer {
   /**
    * Get system font directories for the current platform
    */
-  private getSystemFontPaths(): string[] {
+  private getSystemFontDirectories(): string[] {
     const home = homedir();
     const plat = platform();
 
     if (plat === "darwin") {
       return [
-        join(home, "Library/Fonts", DEFAULT_FONT_FILENAME),
-        join("/Library/Fonts", DEFAULT_FONT_FILENAME),
-        join("/System/Library/Fonts", DEFAULT_FONT_FILENAME),
+        join(home, "Library/Fonts"),
+        "/Library/Fonts",
+        "/System/Library/Fonts",
+        "/System/Library/Fonts/Supplemental",
       ];
     }
 
     if (plat === "linux") {
       return [
-        join(home, ".fonts", DEFAULT_FONT_FILENAME),
-        join(home, ".local/share/fonts", DEFAULT_FONT_FILENAME),
-        join("/usr/share/fonts/truetype", DEFAULT_FONT_FILENAME),
-        join("/usr/local/share/fonts", DEFAULT_FONT_FILENAME),
+        join(home, ".fonts"),
+        join(home, ".local/share/fonts"),
+        "/usr/share/fonts/truetype",
+        "/usr/share/fonts/TTF",
+        "/usr/local/share/fonts",
       ];
     }
 
     if (plat === "win32") {
-      return [join("C:\\Windows\\Fonts", DEFAULT_FONT_FILENAME)];
+      return ["C:\\Windows\\Fonts"];
     }
 
     return [];
+  }
+
+  /**
+   * Get system font paths for the default font filename
+   */
+  private getSystemFontPaths(): string[] {
+    return this.getSystemFontDirectories().map((dir) =>
+      join(dir, DEFAULT_FONT_FILENAME)
+    );
+  }
+
+  /**
+   * Find a font by name in system font directories
+   *
+   * Searches for common font file extensions (.ttf, .ttc, .otf)
+   */
+  private findFontByName(fontName: string): string {
+    const extensions = [".ttf", ".ttc", ".otf", ".TTC", ".TTF", ".OTF"];
+    const directories = this.getSystemFontDirectories();
+
+    for (const dir of directories) {
+      for (const ext of extensions) {
+        const fontPath = join(dir, `${fontName}${ext}`);
+        try {
+          if (existsSync(fontPath)) {
+            return fontPath;
+          }
+        } catch {
+          // Continue to next path
+        }
+      }
+    }
+
+    // If not found, throw a helpful error
+    throw new Error(
+      `Font "${fontName}" not found in system font directories.\n` +
+        `Searched directories:\n  - ${directories.join("\n  - ")}\n` +
+        `Tried extensions: ${extensions.join(", ")}`
+    );
   }
 
   /**

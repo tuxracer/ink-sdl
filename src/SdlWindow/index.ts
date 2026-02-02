@@ -32,6 +32,8 @@ export interface SdlStreamsOptions {
   systemFont?: boolean;
   /** Path to a custom TTF font file */
   fontPath?: string;
+  /** Font name to search for in system font directories */
+  fontName?: string;
 }
 
 /**

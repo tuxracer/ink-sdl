@@ -70,6 +70,8 @@ export interface SdlUiRendererOptions {
   systemFont?: boolean;
   /** Path to a custom TTF font file */
   fontPath?: string;
+  /** Font name to search for in system font directories */
+  fontName?: string;
 }
 
 /** Result from processing SDL events */
@@ -177,6 +179,7 @@ export class SdlUiRenderer {
       scaleFactor: this.scaleFactor,
       ...(options.systemFont && { systemFont: true }),
       ...(options.fontPath && { fontPath: options.fontPath }),
+      ...(options.fontName && { fontName: options.fontName }),
     });
 
     // Get character dimensions
