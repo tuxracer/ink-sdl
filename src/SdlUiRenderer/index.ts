@@ -295,13 +295,7 @@ export class SdlUiRenderer {
     this.createRenderTarget();
 
     // Set background color
-    this.sdl.setRenderDrawColor(
-      this.renderer,
-      this.defaultBgColor.r,
-      this.defaultBgColor.g,
-      this.defaultBgColor.b,
-      COLOR_CHANNEL_MAX
-    );
+    this.setDrawColor(this.defaultBgColor);
 
     // Initial clear of the render target
     this.sdl.setRenderTarget(this.renderer, this.renderTarget);
@@ -446,13 +440,7 @@ export class SdlUiRenderer {
 
       case "clear_screen":
         // Clear the render target directly (don't call clear() which resets render target)
-        this.sdl.setRenderDrawColor(
-          this.renderer!,
-          this.defaultBgColor.r,
-          this.defaultBgColor.g,
-          this.defaultBgColor.b,
-          COLOR_CHANNEL_MAX
-        );
+        this.setDrawColor(this.defaultBgColor);
         this.sdl.renderClear(this.renderer!);
         this.ansiParser.reset();
         break;
@@ -557,13 +545,7 @@ export class SdlUiRenderer {
     // Draw background rectangle
     const textWidth = text.length * this.charWidth;
     const bgRect = createSDLRect(x, y, textWidth, this.charHeight);
-    this.sdl.setRenderDrawColor(
-      this.renderer,
-      bg.r,
-      bg.g,
-      bg.b,
-      COLOR_CHANNEL_MAX
-    );
+    this.setDrawColor(bg);
     this.sdl.renderFillRect(this.renderer, bgRect);
 
     // Render text
@@ -576,13 +558,7 @@ export class SdlUiRenderer {
         Math.round(this.charHeight * TEXT_DECORATION_THICKNESS)
       );
 
-      this.sdl.setRenderDrawColor(
-        this.renderer,
-        fg.r,
-        fg.g,
-        fg.b,
-        COLOR_CHANNEL_MAX
-      );
+      this.setDrawColor(fg);
 
       if (this.underline) {
         const underlineY = y + Math.round(this.charHeight * UNDERLINE_POSITION);
@@ -614,18 +590,25 @@ export class SdlUiRenderer {
 
     // Clear the render target texture
     this.sdl.setRenderTarget(this.renderer, this.renderTarget);
-    this.sdl.setRenderDrawColor(
-      this.renderer,
-      this.defaultBgColor.r,
-      this.defaultBgColor.g,
-      this.defaultBgColor.b,
-      COLOR_CHANNEL_MAX
-    );
+    this.setDrawColor(this.defaultBgColor);
     this.sdl.renderClear(this.renderer);
     this.sdl.setRenderTarget(this.renderer, null);
 
     // Reset parser state
     this.ansiParser.reset();
+  }
+
+  /**
+   * Set the SDL render draw color
+   */
+  private setDrawColor(color: Color): void {
+    this.sdl.setRenderDrawColor(
+      this.renderer!,
+      color.r,
+      color.g,
+      color.b,
+      COLOR_CHANNEL_MAX
+    );
   }
 
   /**
@@ -642,13 +625,7 @@ export class SdlUiRenderer {
     const clearWidth = drawable.width - x;
 
     const rect = createSDLRect(x, y, clearWidth, this.charHeight);
-    this.sdl.setRenderDrawColor(
-      this.renderer,
-      this.bgColor.r,
-      this.bgColor.g,
-      this.bgColor.b,
-      COLOR_CHANNEL_MAX
-    );
+    this.setDrawColor(this.bgColor);
     this.sdl.renderFillRect(this.renderer, rect);
   }
 
