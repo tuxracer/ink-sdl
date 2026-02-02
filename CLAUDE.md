@@ -47,6 +47,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
 - **Package manager**: Use `pnpm` for all package management (install, add, remove, etc.)
 - **ESM imports only**: Always use `import` syntax, never `require()`. This is an ESM project and `require` will throw `ReferenceError: require is not defined`
 - **Arrow functions**: Use `const foo = () => { ... }` (enforced by ESLint, auto-fixable)
+- **Reserve `use` prefix for React hooks**: The `useFoo` naming convention is reserved for React hooks. For boolean options or flags, use names like `systemFont`, `enableCache`, or `withValidation` instead of `useSystemFont`, `useCache`, or `useValidation`
 - **Named imports**: Use `import { pipe, filter } from 'remeda'` not `import * as R` (tree-shaking)
 - **Remeda utilities**: Prefer for array/object manipulation over manual loops
 - **Named constants**: Use `const HEADER_SIZE = 16` not magic numbers
