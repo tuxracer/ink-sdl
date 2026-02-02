@@ -76,9 +76,15 @@ export class SdlWindow extends EventEmitter {
       for (const event of keyEvents) {
         const sequence = this.renderer.keyEventToSequence(event);
         if (sequence) {
-          // Ctrl+C sends SIGINT to the process (like a real terminal)
+          // Ctrl+C handling: emit "sigint" for graceful shutdown opportunity
           if (sequence === "\x03") {
-            process.kill(process.pid, "SIGINT");
+            if (this.listenerCount("sigint") > 0) {
+              // Application has a handler - let it manage shutdown gracefully
+              this.emit("sigint");
+            } else {
+              // No handler - send SIGINT like a real terminal
+              process.kill(process.pid, "SIGINT");
+            }
             continue;
           }
 
