@@ -6,10 +6,8 @@
  */
 
 import koffi from "koffi";
-import { platform } from "os";
-import { existsSync } from "fs";
-import { find, last } from "remeda";
 import type { SDLPointer } from "./types";
+import { findLibrary } from "../utils/findLibrary";
 import {
   INT32_BYTES,
   SDL_EVENT_SIZE,
@@ -48,28 +46,6 @@ const SDL_LIB_PATHS: Record<string, string[]> = {
     "libSDL2-2.0.so.0", // System path
   ],
   win32: ["SDL2.dll", "C:\\Windows\\System32\\SDL2.dll"],
-};
-
-/**
- * Check if a path is a system path (no directory, let koffi search)
- */
-const isSystemPath = (p: string): boolean =>
-  !p.includes("/") && !p.includes("\\");
-
-/**
- * Find a library path for the current platform
- */
-export const findLibrary = (
-  pathMap: Record<string, string[]>
-): string | null => {
-  const plat = platform();
-  const paths = pathMap[plat] ?? [];
-
-  // Try paths in order: system paths are accepted immediately,
-  // paths with directories must exist on disk
-  const foundPath = find(paths, (p) => isSystemPath(p) || existsSync(p));
-
-  return foundPath ?? last(paths) ?? null;
 };
 
 /**

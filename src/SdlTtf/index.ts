@@ -6,10 +6,8 @@
  */
 
 import koffi from "koffi";
-import { platform } from "os";
-import { existsSync } from "fs";
-import { find, last } from "remeda";
 import { getSdl2, type SDLPointer, INT32_BYTES } from "../Sdl2";
+import { findLibrary } from "../utils/findLibrary";
 
 // SDL2_ttf library paths by platform
 const SDL_TTF_LIB_PATHS: Record<string, string[]> = {
@@ -27,26 +25,6 @@ const SDL_TTF_LIB_PATHS: Record<string, string[]> = {
     "libSDL2_ttf-2.0.so.0", // System path
   ],
   win32: ["SDL2_ttf.dll", "C:\\Windows\\System32\\SDL2_ttf.dll"],
-};
-
-/**
- * Check if a path is a system path (no directory, let koffi search)
- */
-const isSystemPath = (p: string): boolean =>
-  !p.includes("/") && !p.includes("\\");
-
-/**
- * Find a library path for the current platform
- */
-const findLibrary = (pathMap: Record<string, string[]>): string | null => {
-  const plat = platform();
-  const paths = pathMap[plat] ?? [];
-
-  // Try paths in order: system paths are accepted immediately,
-  // paths with directories must exist on disk
-  const foundPath = find(paths, (p) => isSystemPath(p) || existsSync(p));
-
-  return foundPath ?? last(paths) ?? null;
 };
 
 /**
