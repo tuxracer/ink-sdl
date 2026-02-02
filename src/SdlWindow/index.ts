@@ -9,7 +9,7 @@ import { pickBy, isDefined } from "remeda";
 import { SdlUiRenderer, type SdlUiRendererOptions } from "../SdlUiRenderer";
 import { SdlOutputStream } from "../SdlOutputStream";
 import { SdlInputStream } from "../SdlInputStream";
-import { getSDL2 } from "../sdl";
+import { getSdl2 } from "../Sdl2";
 import { EVENT_LOOP_INTERVAL_MS } from "./consts";
 
 /**
@@ -102,7 +102,7 @@ export class SdlWindow extends EventEmitter {
   setTitle(title: string): void {
     const window = this.renderer.getWindow();
     if (window) {
-      getSDL2().setWindowTitle(window, title);
+      getSdl2().setWindowTitle(window, title);
     }
   }
 

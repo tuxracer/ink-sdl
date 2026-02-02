@@ -37,15 +37,17 @@ export { SdlOutputStream } from "./SdlOutputStream";
 export { SdlInputStream } from "./SdlInputStream";
 
 // SDL availability check
-import { isSDL2Available, isSDL_ttfAvailable } from "./sdl";
-export { isSDL2Available, isSDL_ttfAvailable };
+import { isSdl2Available } from "./Sdl2";
+import { isSdlTtfAvailable } from "./SdlTtf";
+export { isSdl2Available };
+export { isSdlTtfAvailable };
 
 /**
  * Check if SDL is available for rendering
  */
 export const isSdlAvailable = (): boolean => {
   try {
-    return isSDL2Available() && isSDL_ttfAvailable();
+    return isSdl2Available() && isSdlTtfAvailable();
   } catch {
     return false;
   }
@@ -59,11 +61,10 @@ export { InputBridge, type InkKeyEvent } from "./InputBridge";
 
 // SDL bindings (for advanced use)
 export {
-  getSDL2,
-  getSDL_ttf,
-  SDL2API,
-  SDL_ttfAPI,
+  getSdl2,
+  Sdl2,
   createSDLRect,
   type SDLPointer,
   type SdlKeyEvent,
-} from "./sdl";
+} from "./Sdl2";
+export { getSdlTtf, SdlTtf } from "./SdlTtf";

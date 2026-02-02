@@ -9,13 +9,9 @@ import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
 import { sortBy, take } from "remeda";
-import {
-  getSDL2,
-  getSDL_ttf,
-  createSDLRect,
-  SDL_BLENDMODE_BLEND,
-} from "../sdl";
-import type { SDLPointer } from "../sdl";
+import { getSdl2, createSDLRect, SDL_BLENDMODE_BLEND } from "../Sdl2";
+import { getSdlTtf } from "../SdlTtf";
+import type { SDLPointer } from "../Sdl2";
 import type { Color } from "../AnsiParser";
 import {
   COLOR_CHANNEL_MAX,
@@ -46,8 +42,8 @@ interface CachedGlyph {
  * Supports HiDPI displays by scaling font size based on scale factor.
  */
 export class TextRenderer {
-  private sdl = getSDL2();
-  private ttf = getSDL_ttf();
+  private sdl = getSdl2();
+  private ttf = getSdlTtf();
   private font: SDLPointer | null = null;
   private renderer: SDLPointer;
   private baseFontSize: number;

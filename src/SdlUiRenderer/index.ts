@@ -6,7 +6,7 @@
  */
 
 import {
-  getSDL2,
+  getSdl2,
   SDL_INIT_VIDEO,
   SDL_INIT_EVENTS,
   SDL_WINDOW_SHOWN,
@@ -22,8 +22,8 @@ import {
   SDL_KEYDOWN,
   SDL_KEYUP,
   createSDLRect,
-} from "../sdl";
-import type { SDLPointer, SdlKeyEvent } from "../sdl";
+} from "../Sdl2";
+import type { SDLPointer, SdlKeyEvent } from "../Sdl2";
 import { AnsiParser, type DrawCommand, type Color } from "../AnsiParser";
 import { TextRenderer } from "../TextRenderer";
 import { InputBridge } from "../InputBridge";
@@ -68,7 +68,7 @@ export interface SdlUiRendererOptions {
  * drawing text with SDL_ttf.
  */
 export class SdlUiRenderer {
-  private sdl = getSDL2();
+  private sdl = getSdl2();
   private window: SDLPointer | null = null;
   private renderer: SDLPointer | null = null;
   private textRenderer: TextRenderer | null = null;

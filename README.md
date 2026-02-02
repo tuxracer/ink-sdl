@@ -190,8 +190,8 @@ import {
   AnsiParser,
   TextRenderer,
   InputBridge,
-  getSDL2,
-  getSDL_ttf,
+  getSdl2,
+  getSdlTtf,
 } from "ink-sdl";
 ```
 
