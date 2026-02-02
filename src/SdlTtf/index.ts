@@ -79,6 +79,8 @@ export class SdlTtf {
     w: Buffer,
     h: Buffer
   ) => number;
+  private _TTF_SetFontStyle!: (font: SDLPointer, style: number) => void;
+  private _TTF_GetFontStyle!: (font: SDLPointer) => number;
 
   constructor() {
     const libPath = findSDLTtfLibrary();
@@ -130,6 +132,11 @@ export class SdlTtf {
     this._TTF_SizeUTF8 = this.lib.func(
       "int TTF_SizeUTF8(void* font, const char* text, int* w, int* h)"
     );
+
+    this._TTF_SetFontStyle = this.lib.func(
+      "void TTF_SetFontStyle(void* font, int style)"
+    );
+    this._TTF_GetFontStyle = this.lib.func("int TTF_GetFontStyle(void* font)");
   }
 
   /**
@@ -225,7 +232,28 @@ export class SdlTtf {
   isInitialized(): boolean {
     return this.initialized;
   }
+
+  /**
+   * Set font style (bold, italic, underline, strikethrough)
+   */
+  setFontStyle(font: SDLPointer, style: number): void {
+    this._TTF_SetFontStyle(font, style);
+  }
+
+  /**
+   * Get current font style
+   */
+  getFontStyle(font: SDLPointer): number {
+    return this._TTF_GetFontStyle(font);
+  }
 }
+
+// TTF Style constants
+export const TTF_STYLE_NORMAL = 0x00;
+export const TTF_STYLE_BOLD = 0x01;
+export const TTF_STYLE_ITALIC = 0x02;
+export const TTF_STYLE_UNDERLINE = 0x04;
+export const TTF_STYLE_STRIKETHROUGH = 0x08;
 
 // Singleton instance (lazy-loaded)
 let ttfInstance: SdlTtf | null = null;

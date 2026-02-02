@@ -11,7 +11,7 @@ import { existsSync } from "fs";
 import { platform, homedir } from "os";
 import { sortBy, take } from "remeda";
 import { getSdl2, createSDLRect, SDL_BLENDMODE_BLEND } from "../Sdl2";
-import { getSdlTtf } from "../SdlTtf";
+import { getSdlTtf, TTF_STYLE_NORMAL, TTF_STYLE_ITALIC } from "../SdlTtf";
 import type { SDLPointer } from "../Sdl2";
 import type { Color } from "../AnsiParser";
 import {
@@ -280,10 +280,16 @@ export class TextRenderer {
   /**
    * Generate cache key for a glyph
    */
-  private getCacheKey(char: string, r: number, g: number, b: number): string {
+  private getCacheKey(
+    char: string,
+    r: number,
+    g: number,
+    b: number,
+    italic: boolean
+  ): string {
     // Pack color into a single number for faster key generation
     const packedColor = (r << PACK_RED_SHIFT) | (g << PACK_GREEN_SHIFT) | b;
-    return `${char}:${packedColor}`;
+    return `${char}:${packedColor}:${italic ? "i" : "n"}`;
   }
 
   /**
@@ -293,9 +299,10 @@ export class TextRenderer {
     char: string,
     r: number,
     g: number,
-    b: number
+    b: number,
+    italic: boolean = false
   ): CachedGlyph | null {
-    const key = this.getCacheKey(char, r, g, b);
+    const key = this.getCacheKey(char, r, g, b, italic);
 
     // Check cache
     const cached = this.glyphCache.get(key);
@@ -310,6 +317,13 @@ export class TextRenderer {
     }
 
     try {
+      // Apply font style for italic
+      const currentStyle = this.ttf.getFontStyle(this.font);
+      const targetStyle = italic ? TTF_STYLE_ITALIC : TTF_STYLE_NORMAL;
+      if (currentStyle !== targetStyle) {
+        this.ttf.setFontStyle(this.font, targetStyle);
+      }
+
       // Render text to surface with WHITE color
       // We'll apply the actual color via texture color mod
       const surface = this.ttf.renderTextBlended(
@@ -378,8 +392,14 @@ export class TextRenderer {
   /**
    * Render a single character at the specified position
    */
-  renderChar(char: string, x: number, y: number, color: Color): void {
-    const glyph = this.getGlyph(char, color.r, color.g, color.b);
+  renderChar(
+    char: string,
+    x: number,
+    y: number,
+    color: Color,
+    italic: boolean = false
+  ): void {
+    const glyph = this.getGlyph(char, color.r, color.g, color.b, italic);
     if (!glyph) {
       return;
     }
@@ -391,7 +411,13 @@ export class TextRenderer {
   /**
    * Render a string of text at the specified position
    */
-  renderText(text: string, x: number, y: number, color: Color): void {
+  renderText(
+    text: string,
+    x: number,
+    y: number,
+    color: Color,
+    italic: boolean = false
+  ): void {
     let cursorX = x;
 
     for (const char of text) {
@@ -400,7 +426,7 @@ export class TextRenderer {
         continue;
       }
 
-      this.renderChar(char, cursorX, y, color);
+      this.renderChar(char, cursorX, y, color, italic);
       cursorX += this.charWidth;
     }
   }

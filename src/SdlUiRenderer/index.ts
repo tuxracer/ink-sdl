@@ -106,6 +106,7 @@ export class SdlUiRenderer {
   private bgColor: Color = { ...DEFAULT_BG };
   private bold = false;
   private dim = false;
+  private italic = false;
   private underline = false;
   private strikethrough = false;
   private reverse = false;
@@ -338,6 +339,7 @@ export class SdlUiRenderer {
         this.bgColor = { ...DEFAULT_BG };
         this.bold = false;
         this.dim = false;
+        this.italic = false;
         this.underline = false;
         this.strikethrough = false;
         this.reverse = false;
@@ -352,7 +354,7 @@ export class SdlUiRenderer {
         break;
 
       case "set_italic":
-        // Italic not visually rendered (would require font style support)
+        this.italic = cmd.enabled ?? false;
         break;
 
       case "set_underline":
@@ -445,7 +447,7 @@ export class SdlUiRenderer {
     this.sdl.renderFillRect(this.renderer, bgRect);
 
     // Render text
-    this.textRenderer.renderText(text, x, y, fg);
+    this.textRenderer.renderText(text, x, y, fg, this.italic);
 
     // Draw text decorations (underline, strikethrough)
     if (this.underline || this.strikethrough) {
@@ -721,6 +723,7 @@ export class SdlUiRenderer {
     this.bgColor = { ...DEFAULT_BG };
     this.bold = false;
     this.dim = false;
+    this.italic = false;
     this.underline = false;
     this.strikethrough = false;
     this.reverse = false;
