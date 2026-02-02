@@ -11,13 +11,17 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "bin": {
+    "ink-sdl": "./dist/cli.js"
+  },
   "files": [
     "dist",
     "src/fonts"
   ],
   "scripts": {
     "dev": "tsx src/index.ts",
-    "build": "tsup src/index.ts --format esm --dts --clean",
+    "demo": "tsx src/cli.tsx",
+    "build": "tsup src/index.ts src/cli.tsx --format esm --dts --clean",
     "start": "node dist/index.js",
     "lint": "eslint src/",
     "lint:fix": "eslint src/ --fix",

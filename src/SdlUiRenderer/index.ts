@@ -111,15 +111,15 @@ export interface SdlUiRendererOptions {
   /** Font name to search for in system font directories */
   fontName?: string;
   /** Background color as RGB tuple [r, g, b] or hex string "#RRGGBB" */
-  backgroundColor?: [number, number, number] | string;
+  backgroundColor?: [number, number, number] | string | undefined;
   /** Fullscreen mode: true for exclusive fullscreen, "desktop" for borderless fullscreen */
-  fullscreen?: boolean | "desktop";
+  fullscreen?: boolean | "desktop" | undefined;
   /** Remove window decorations (title bar, borders) */
-  borderless?: boolean;
+  borderless?: boolean | undefined;
   /** Minimum window width in pixels */
-  minWidth?: number;
+  minWidth?: number | undefined;
   /** Minimum window height in pixels */
-  minHeight?: number;
+  minHeight?: number | undefined;
 }
 
 /** Result from processing SDL events */

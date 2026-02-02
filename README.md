@@ -47,35 +47,34 @@ pnpm add ink-sdl
 
 ## Demo
 
-To run the included example:
+Run the built-in demo to see ink-sdl in action:
 
 ```bash
-git clone https://github.com/anthropics/ink-sdl.git
-cd ink-sdl
-pnpm install
-pnpm exec tsx examples/hello.tsx
+npx ink-sdl
+# or
+pnpm dlx ink-sdl
 ```
 
-The example supports CLI flags for testing different display settings:
+The demo showcases text styles, colors, box layouts, and dynamic updates. Use `--help` to see all available options:
+
+```bash
+npx ink-sdl --help
+```
+
+**Example commands:**
 
 ```bash
 # Custom font size
-pnpm exec tsx examples/hello.tsx --font-size 20
+npx ink-sdl --font-size 20
 
-# Override scale factor (useful for HiDPI testing)
-pnpm exec tsx examples/hello.tsx --scale-factor 2.0
+# Dark background with system font
+npx ink-sdl --background "#1a1a2e" --system-font
 
-# Use system font instead of bundled Cozette
-pnpm exec tsx examples/hello.tsx --system-font
+# Borderless fullscreen mode
+npx ink-sdl --fullscreen desktop
 
-# Use a custom TTF font by path
-pnpm exec tsx examples/hello.tsx --font /path/to/font.ttf
-
-# Use a system font by name (searches system font directories)
-pnpm exec tsx examples/hello.tsx --font-name Menlo
-
-# All options
-pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-size 18 --scale-factor 1.5 --system-font
+# Use a specific font
+npx ink-sdl --font-name Menlo
 ```
 
 | Flag             | Description                                                 |
@@ -95,6 +94,12 @@ pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-
 | `--min-height`   | Minimum window height in pixels                             |
 
 > **Note:** This project uses [pnpm](https://pnpm.io/) for development. You can install and use ink-sdl in your own project with npm or pnpm, but if you're contributing to the library itself, use pnpm.
+
+**For local development**, run the demo directly from source:
+
+```bash
+pnpm demo
+```
 
 ## Usage
 

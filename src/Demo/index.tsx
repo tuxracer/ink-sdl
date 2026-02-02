@@ -1,55 +1,41 @@
 /**
- * Comprehensive demo for ink-sdl
+ * Demo App for ink-sdl
  *
- * Tests various Ink components and ANSI rendering capabilities:
- * - Text styles: bold, dim, italic, underline, strikethrough, inverse
- * - Colors: ANSI 16, ANSI 256, RGB true color
- * - Box layouts: flexDirection, padding, margin, borders
- * - Dynamic updates: timers, counters, progress bars
- * - User input: keyboard navigation, tab switching
- *
- * Run with: npx tsx examples/hello.tsx
- * CLI options:
- *   --terminal              Render to terminal instead of SDL window
- *   --system-font           Use system font instead of bundled Cozette
- *   --font <path>           Path to a custom TTF font file
- *   --font-name <name>      Font name to find in system directories
- *   --title <string>        Window title
- *   --width <number>        Window width in pixels
- *   --height <number>       Window height in pixels
- *   --font-size <number>    Font size in points
- *   --scale-factor <number> Scale factor (omit for auto-detect)
- *   --background <hex>      Background color (e.g., "#1a1a2e")
- *   --fullscreen <mode>     Fullscreen mode ("true" or "desktop")
- *   --borderless            Remove window decorations
- *   --min-width <number>    Minimum window width in pixels
- *   --min-height <number>   Minimum window height in pixels
+ * Showcases ink-sdl capabilities including text styles, colors,
+ * layouts, and dynamic updates. Run with `pnpm demo`.
  */
 
-import { parseArgs } from "node:util";
-// Import ink-sdl before ink to enable ANSI color output automatically
-import { createSdlStreams } from "../src";
-import React, { useState, useEffect } from "react";
-import { render, Text, Box, useInput, Spacer, Newline } from "ink";
+import { useState, useEffect } from "react";
+import { Text, Box, useInput, Spacer, Newline } from "ink";
 
-const { values: args } = parseArgs({
-  options: {
-    title: { type: "string" },
-    width: { type: "string" },
-    height: { type: "string" },
-    font: { type: "string" },
-    "font-name": { type: "string" },
-    "font-size": { type: "string" },
-    "scale-factor": { type: "string" },
-    "system-font": { type: "boolean", default: false },
-    terminal: { type: "boolean", default: false },
-    background: { type: "string" },
-    fullscreen: { type: "string" },
-    borderless: { type: "boolean", default: false },
-    "min-width": { type: "string" },
-    "min-height": { type: "string" },
-  },
-});
+// ============================================================================
+// Constants
+// ============================================================================
+
+/** Timer interval for dynamic updates (1 second) */
+const TIMER_INTERVAL_MS = 1_000;
+
+/** Maximum percentage value */
+const PERCENT_MAX = 100;
+
+/** Default progress bar width */
+const DEFAULT_PROGRESS_WIDTH = 20;
+
+/** Decimal places for scale factor display */
+const SCALE_DECIMAL_PLACES = 2;
+
+/** Progress bar multipliers for variety */
+const PROGRESS_MEM_MULTIPLIER = 0.7;
+const PROGRESS_MEM_OFFSET = 30;
+const PROGRESS_DSK_MULTIPLIER = 0.4;
+const PROGRESS_DSK_OFFSET = 60;
+
+/** Animation width for bouncing dot */
+const ANIMATION_WIDTH = 10;
+
+/** Sample ANSI 256 color codes for demo (rainbow spectrum) */
+// eslint-disable-next-line @typescript-eslint/no-magic-numbers
+const ANSI_256_SAMPLE_COLORS = [196, 208, 226, 46, 51, 21, 129, 201];
 
 // ============================================================================
 // Tab Components
@@ -138,7 +124,7 @@ const ExtendedColorsTab = () => (
     <Box flexDirection="column" paddingLeft={1}>
       <Text>ANSI 256 (color codes):</Text>
       <Box gap={1}>
-        {[196, 208, 226, 46, 51, 21, 129, 201].map((code) => (
+        {ANSI_256_SAMPLE_COLORS.map((code) => (
           <Text key={code} color={`ansi256-${code}` as never}>
             #{code}
           </Text>
@@ -159,22 +145,21 @@ const ExtendedColorsTab = () => (
       <Newline />
       <Text>Gradient effect:</Text>
       <Box>
-        {"RAINBOW".split("").map((char, i) => {
-          const colors = [
-            "#ff0000",
-            "#ff7f00",
-            "#ffff00",
-            "#00ff00",
-            "#0000ff",
-            "#4b0082",
-            "#9400d3",
-          ];
-          return (
-            <Text key={i} color={colors[i]}>
-              {char}
-            </Text>
-          );
-        })}
+        {(
+          [
+            { char: "R", color: "#ff0000" },
+            { char: "A", color: "#ff7f00" },
+            { char: "I", color: "#ffff00" },
+            { char: "N", color: "#00ff00" },
+            { char: "B", color: "#0000ff" },
+            { char: "O", color: "#4b0082" },
+            { char: "W", color: "#9400d3" },
+          ] as const
+        ).map(({ char, color }) => (
+          <Text key={char} color={color}>
+            {char}
+          </Text>
+        ))}
       </Box>
     </Box>
   </Box>
@@ -249,14 +234,14 @@ const LayoutTab = () => (
 /** Progress bar component */
 const ProgressBar = ({
   value,
-  width = 20,
+  width = DEFAULT_PROGRESS_WIDTH,
   color = "green",
 }: {
   value: number;
   width?: number;
   color?: string;
 }) => {
-  const filled = Math.round((value / 100) * width);
+  const filled = Math.round((value / PERCENT_MAX) * width);
   const empty = width - filled;
   return (
     <Text>
@@ -298,11 +283,23 @@ const DynamicTab = ({
           </Box>
           <Box gap={1}>
             <Text>MEM:</Text>
-            <ProgressBar value={(progress * 0.7 + 30) % 100} color="blue" />
+            <ProgressBar
+              value={
+                (progress * PROGRESS_MEM_MULTIPLIER + PROGRESS_MEM_OFFSET) %
+                PERCENT_MAX
+              }
+              color="blue"
+            />
           </Box>
           <Box gap={1}>
             <Text>DSK:</Text>
-            <ProgressBar value={(progress * 0.4 + 60) % 100} color="yellow" />
+            <ProgressBar
+              value={
+                (progress * PROGRESS_DSK_MULTIPLIER + PROGRESS_DSK_OFFSET) %
+                PERCENT_MAX
+              }
+              color="yellow"
+            />
           </Box>
         </Box>
 
@@ -310,7 +307,9 @@ const DynamicTab = ({
         <Text>Animation:</Text>
         <Box paddingLeft={1}>
           <Text color="cyan">
-            {"●".padStart((elapsed % 10) + 1, " ").padEnd(10, " ")}
+            {"●"
+              .padStart((elapsed % ANIMATION_WIDTH) + 1, " ")
+              .padEnd(ANIMATION_WIDTH, " ")}
           </Text>
         </Box>
       </Box>
@@ -318,26 +317,44 @@ const DynamicTab = ({
   );
 };
 
+// ============================================================================
+// Menu Configuration
+// ============================================================================
+
+/** Tab index constants */
+const TAB_STYLES = 0;
+const TAB_COLORS = 1;
+const TAB_EXTENDED = 2;
+const TAB_LAYOUT = 3;
+const TAB_DYNAMIC = 4;
+
 /** Main menu items */
 const MENU_ITEMS = [
-  { id: "styles", label: "Text Styles", component: TextStylesTab },
-  { id: "colors", label: "Basic Colors", component: BasicColorsTab },
-  { id: "extended", label: "Extended Colors", component: ExtendedColorsTab },
-  { id: "layout", label: "Layouts", component: LayoutTab },
-  { id: "dynamic", label: "Dynamic", component: null }, // Special handling
+  { id: "styles", label: "Text Styles" },
+  { id: "colors", label: "Basic Colors" },
+  { id: "extended", label: "Extended Colors" },
+  { id: "layout", label: "Layouts" },
+  { id: "dynamic", label: "Dynamic" },
 ];
 
 // ============================================================================
 // Main App
 // ============================================================================
 
-const App = ({
-  scaleFactor,
-  cacheStats,
-}: {
+export interface DemoAppProps {
+  /** Current scale factor for display */
   scaleFactor: number;
-  cacheStats: { size: number; maxSize: number } | null;
-}) => {
+  /** Glyph cache statistics (optional) */
+  cacheStats?: { size: number; maxSize: number } | null;
+}
+
+/**
+ * Demo App component
+ *
+ * A comprehensive demo showcasing ink-sdl capabilities including
+ * text styles, colors, layouts, and dynamic updates.
+ */
+export const DemoApp = ({ scaleFactor, cacheStats }: DemoAppProps) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [progress, setProgress] = useState(0);
@@ -345,8 +362,8 @@ const App = ({
   useEffect(() => {
     const timer = setInterval(() => {
       setElapsed((e) => e + 1);
-      setProgress((p) => (p + 2) % 100);
-    }, 1_000);
+      setProgress((p) => (p + 2) % PERCENT_MAX);
+    }, TIMER_INTERVAL_MS);
     return () => clearInterval(timer);
   }, []);
 
@@ -360,36 +377,47 @@ const App = ({
     }
   });
 
-  const CurrentTab = MENU_ITEMS[selectedTab]?.component;
-
   return (
     <Box flexDirection="column" padding={1}>
       {/* Header */}
       <Box borderStyle="double" borderColor="cyan" paddingX={2}>
         <Text bold color="cyan">
-          ink-sdl Comprehensive Demo
+          ink-sdl Demo
         </Text>
         <Spacer />
         <Text dimColor>
-          Scale: {scaleFactor.toFixed(2)}x | Cache:{" "}
-          {cacheStats ? `${cacheStats.size}/${cacheStats.maxSize}` : "N/A"}
+          Scale: {scaleFactor.toFixed(SCALE_DECIMAL_PLACES)}x
+          {cacheStats
+            ? ` | Cache: ${cacheStats.size}/${cacheStats.maxSize}`
+            : ""}
         </Text>
       </Box>
 
       {/* Tab bar */}
       <Box marginY={1} gap={1}>
-        {MENU_ITEMS.map((item, i) => (
-          <Box
-            key={item.id}
-            borderStyle={i === selectedTab ? "round" : "single"}
-            borderColor={i === selectedTab ? "cyan" : "gray"}
-            paddingX={1}
-          >
-            <Text color={i === selectedTab ? "cyan" : undefined} bold={i === selectedTab}>
-              {item.label}
-            </Text>
-          </Box>
-        ))}
+        {MENU_ITEMS.map((item, i) =>
+          i === selectedTab ? (
+            <Box
+              key={item.id}
+              borderStyle="round"
+              borderColor="cyan"
+              paddingX={1}
+            >
+              <Text color="cyan" bold>
+                {item.label}
+              </Text>
+            </Box>
+          ) : (
+            <Box
+              key={item.id}
+              borderStyle="single"
+              borderColor="gray"
+              paddingX={1}
+            >
+              <Text>{item.label}</Text>
+            </Box>
+          )
+        )}
       </Box>
 
       {/* Content area */}
@@ -400,9 +428,11 @@ const App = ({
         padding={1}
         minHeight={15}
       >
-        {CurrentTab ? (
-          <CurrentTab />
-        ) : (
+        {selectedTab === TAB_STYLES && <TextStylesTab />}
+        {selectedTab === TAB_COLORS && <BasicColorsTab />}
+        {selectedTab === TAB_EXTENDED && <ExtendedColorsTab />}
+        {selectedTab === TAB_LAYOUT && <LayoutTab />}
+        {selectedTab === TAB_DYNAMIC && (
           <DynamicTab elapsed={elapsed} progress={progress} />
         )}
       </Box>
@@ -416,61 +446,3 @@ const App = ({
     </Box>
   );
 };
-
-// ============================================================================
-// Setup and Render
-// ============================================================================
-
-if (args.terminal) {
-  // Terminal mode - render to the terminal instead of SDL window
-  render(<App scaleFactor={1} cacheStats={null} />);
-} else {
-  // Parse fullscreen option: "true" -> true, "desktop" -> "desktop", anything else -> undefined
-  const parseFullscreen = (
-    value: string | undefined
-  ): boolean | "desktop" | undefined => {
-    if (value === "true") return true;
-    if (value === "desktop") return "desktop";
-    return undefined;
-  };
-
-  // SDL mode - render to an SDL window
-  const { stdin, stdout, window, renderer } = createSdlStreams({
-    title: args.title ?? "ink-sdl Demo",
-    width: args.width ? parseInt(args.width, 10) : 800,
-    height: args.height ? parseInt(args.height, 10) : 600,
-    fontSize: args["font-size"] ? parseInt(args["font-size"], 10) : undefined,
-    scaleFactor: args["scale-factor"]
-      ? parseFloat(args["scale-factor"])
-      : undefined,
-    systemFont: args["system-font"],
-    fontPath: args.font,
-    fontName: args["font-name"],
-    backgroundColor: args.background,
-    fullscreen: parseFullscreen(args.fullscreen),
-    borderless: args.borderless,
-    minWidth: args["min-width"] ? parseInt(args["min-width"], 10) : undefined,
-    minHeight: args["min-height"] ? parseInt(args["min-height"], 10) : undefined,
-  });
-
-  const scaleFactor = renderer.getScaleFactor();
-  const cacheStats = window.getCacheStats();
-
-  render(<App scaleFactor={scaleFactor} cacheStats={cacheStats} />, {
-    stdin,
-    stdout,
-  });
-
-  window.on("close", () => {
-    process.exit(0);
-  });
-
-  window.on("blur", () => {
-    // Could show a "paused" indicator here
-  });
-
-  process.on("SIGINT", () => {
-    window.close();
-    process.exit(0);
-  });
-}
