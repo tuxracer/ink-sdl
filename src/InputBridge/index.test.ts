@@ -13,6 +13,7 @@ import {
   SDLK_RIGHT,
   SDLK_LCTRL,
   SDLK_LSHIFT,
+  SDLK_LALT,
   ASCII_A_LOWER,
 } from "../Sdl2/consts";
 
@@ -173,6 +174,40 @@ describe("InputBridge", () => {
       bridge.reset();
 
       const modifiers = bridge.getModifiers();
+      expect(modifiers.ctrl).toBe(false);
+      expect(modifiers.shift).toBe(false);
+      expect(modifiers.alt).toBe(false);
+    });
+
+    it("should reset all modifier keys when multiple are pressed", () => {
+      // Press all modifiers
+      bridge.processKeyEvent({
+        keycode: SDLK_LCTRL,
+        pressed: true,
+        repeat: false,
+      });
+      bridge.processKeyEvent({
+        keycode: SDLK_LSHIFT,
+        pressed: true,
+        repeat: false,
+      });
+      bridge.processKeyEvent({
+        keycode: SDLK_LALT,
+        pressed: true,
+        repeat: false,
+      });
+
+      // Verify all are set
+      let modifiers = bridge.getModifiers();
+      expect(modifiers.ctrl).toBe(true);
+      expect(modifiers.shift).toBe(true);
+      expect(modifiers.alt).toBe(true);
+
+      // Reset (simulating focus loss)
+      bridge.reset();
+
+      // Verify all are cleared
+      modifiers = bridge.getModifiers();
       expect(modifiers.ctrl).toBe(false);
       expect(modifiers.shift).toBe(false);
       expect(modifiers.alt).toBe(false);
