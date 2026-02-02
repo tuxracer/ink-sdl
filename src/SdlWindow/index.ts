@@ -101,6 +101,10 @@ export class SdlWindow extends EventEmitter {
         }
       }
 
+      // Refresh the display to prevent screen from going black
+      // SDL's double-buffering requires continuous presents to keep content visible
+      this.renderer.refreshDisplay();
+
       // Check for window close
       if (this.renderer.shouldClose()) {
         this.emit("close");

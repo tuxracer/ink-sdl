@@ -24,6 +24,7 @@ import {
   SDL_KEYUP,
   SDL_TEXTUREACCESS_TARGET,
   SDL_PIXELFORMAT_ARGB8888,
+  SDL_BLENDMODE_BLEND,
   createSDLRect,
 } from "../Sdl2";
 import type { SDLPointer, SdlKeyEvent } from "../Sdl2";
@@ -265,6 +266,9 @@ export class SdlUiRenderer {
       drawable.width,
       drawable.height
     );
+
+    // Set blend mode on render target for proper alpha handling when copying to screen
+    this.sdl.setTextureBlendMode(this.renderTarget, SDL_BLENDMODE_BLEND);
   }
 
   /**
@@ -303,6 +307,30 @@ export class SdlUiRenderer {
   }
 
   /**
+   * Refresh the display by copying the render target to the screen
+   *
+   * Call this periodically to keep the display updated even when no new
+   * content is being rendered. Required for SDL's double-buffering to work
+   * correctly - without continuous presents, the window can go black.
+   */
+  refreshDisplay(): void {
+    if (!this.renderer || !this.renderTarget) {
+      return;
+    }
+
+    // Ensure we're rendering to the screen, not the texture
+    // This is defensive - the render target should already be null after present()
+    // but font operations or other SDL calls might affect renderer state
+    this.sdl.setRenderTarget(this.renderer, null);
+
+    // Copy the render target texture to the screen
+    this.sdl.renderCopy(this.renderer, this.renderTarget, null, null);
+
+    // Present the frame
+    this.sdl.renderPresent(this.renderer);
+  }
+
+  /**
    * Execute a single draw command
    */
   private executeCommand(cmd: DrawCommand): void {
@@ -312,7 +340,16 @@ export class SdlUiRenderer {
         break;
 
       case "clear_screen":
-        this.clear();
+        // Clear the render target directly (don't call clear() which resets render target)
+        this.sdl.setRenderDrawColor(
+          this.renderer!,
+          DEFAULT_BG.r,
+          DEFAULT_BG.g,
+          DEFAULT_BG.b,
+          COLOR_CHANNEL_MAX
+        );
+        this.sdl.renderClear(this.renderer!);
+        this.ansiParser.reset();
         break;
 
       case "clear_line":
