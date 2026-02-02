@@ -25,3 +25,12 @@ export const BOLD_BRIGHTNESS_MULTIPLIER = 1.3;
 
 /** Dim text brightness multiplier */
 export const DIM_BRIGHTNESS_MULTIPLIER = 0.5;
+
+/** Underline position as fraction of character height from top */
+export const UNDERLINE_POSITION = 0.9;
+
+/** Strikethrough position as fraction of character height from top */
+export const STRIKETHROUGH_POSITION = 0.5;
+
+/** Line thickness for underline/strikethrough as fraction of character height */
+export const TEXT_DECORATION_THICKNESS = 0.08;

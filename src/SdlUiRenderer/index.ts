@@ -44,6 +44,9 @@ import {
   MIN_ROWS,
   BOLD_BRIGHTNESS_MULTIPLIER,
   DIM_BRIGHTNESS_MULTIPLIER,
+  UNDERLINE_POSITION,
+  STRIKETHROUGH_POSITION,
+  TEXT_DECORATION_THICKNESS,
 } from "./consts";
 
 /** Default background color (black) */
@@ -101,6 +104,8 @@ export class SdlUiRenderer {
   private bgColor: Color = { ...DEFAULT_BG };
   private bold = false;
   private dim = false;
+  private underline = false;
+  private strikethrough = false;
   private reverse = false;
 
   private shouldQuit = false;
@@ -330,6 +335,8 @@ export class SdlUiRenderer {
         this.bgColor = { ...DEFAULT_BG };
         this.bold = false;
         this.dim = false;
+        this.underline = false;
+        this.strikethrough = false;
         this.reverse = false;
         break;
 
@@ -339,6 +346,18 @@ export class SdlUiRenderer {
 
       case "set_dim":
         this.dim = cmd.enabled ?? false;
+        break;
+
+      case "set_italic":
+        // Italic not visually rendered (would require font style support)
+        break;
+
+      case "set_underline":
+        this.underline = cmd.enabled ?? false;
+        break;
+
+      case "set_strikethrough":
+        this.strikethrough = cmd.enabled ?? false;
         break;
 
       case "set_reverse":
@@ -411,12 +430,8 @@ export class SdlUiRenderer {
     }
 
     // Draw background rectangle
-    const bgRect = createSDLRect(
-      x,
-      y,
-      text.length * this.charWidth,
-      this.charHeight
-    );
+    const textWidth = text.length * this.charWidth;
+    const bgRect = createSDLRect(x, y, textWidth, this.charHeight);
     this.sdl.setRenderDrawColor(
       this.renderer,
       bg.r,
@@ -428,6 +443,40 @@ export class SdlUiRenderer {
 
     // Render text
     this.textRenderer.renderText(text, x, y, fg);
+
+    // Draw text decorations (underline, strikethrough)
+    if (this.underline || this.strikethrough) {
+      const lineThickness = Math.max(
+        1,
+        Math.round(this.charHeight * TEXT_DECORATION_THICKNESS)
+      );
+
+      this.sdl.setRenderDrawColor(
+        this.renderer,
+        fg.r,
+        fg.g,
+        fg.b,
+        COLOR_CHANNEL_MAX
+      );
+
+      if (this.underline) {
+        const underlineY = y + Math.round(this.charHeight * UNDERLINE_POSITION);
+        const underlineRect = createSDLRect(
+          x,
+          underlineY,
+          textWidth,
+          lineThickness
+        );
+        this.sdl.renderFillRect(this.renderer, underlineRect);
+      }
+
+      if (this.strikethrough) {
+        const strikeY =
+          y + Math.round(this.charHeight * STRIKETHROUGH_POSITION);
+        const strikeRect = createSDLRect(x, strikeY, textWidth, lineThickness);
+        this.sdl.renderFillRect(this.renderer, strikeRect);
+      }
+    }
   }
 
   /**
@@ -669,6 +718,8 @@ export class SdlUiRenderer {
     this.bgColor = { ...DEFAULT_BG };
     this.bold = false;
     this.dim = false;
+    this.underline = false;
+    this.strikethrough = false;
     this.reverse = false;
     this.ansiParser.reset();
 

@@ -41,6 +41,9 @@ export type DrawCommandType =
   | "reset_style"
   | "set_bold"
   | "set_dim"
+  | "set_italic"
+  | "set_underline"
+  | "set_strikethrough"
   | "set_reverse";
 
 /** A single draw command from parsed ANSI output */
@@ -87,9 +90,15 @@ const ANSI_COLORS_BRIGHT: Color[] = [
 const SGR_RESET = 0;
 const SGR_BOLD = 1;
 const SGR_DIM = 2;
+const SGR_ITALIC = 3;
+const SGR_UNDERLINE = 4;
 const SGR_REVERSE = 7;
+const SGR_STRIKETHROUGH = 9;
 const SGR_NORMAL_INTENSITY = 22;
+const SGR_NO_ITALIC = 23;
+const SGR_NO_UNDERLINE = 24;
 const SGR_NO_REVERSE = 27;
+const SGR_NO_STRIKETHROUGH = 29;
 const SGR_FG_BASE = 30;
 const SGR_FG_END = 37;
 const SGR_FG_DEFAULT = 39;
@@ -363,14 +372,26 @@ export class AnsiParser {
         commands.push({ type: "set_bold", enabled: true });
       } else if (code === SGR_DIM) {
         commands.push({ type: "set_dim", enabled: true });
+      } else if (code === SGR_ITALIC) {
+        commands.push({ type: "set_italic", enabled: true });
+      } else if (code === SGR_UNDERLINE) {
+        commands.push({ type: "set_underline", enabled: true });
       } else if (code === SGR_REVERSE) {
         commands.push({ type: "set_reverse", enabled: true });
+      } else if (code === SGR_STRIKETHROUGH) {
+        commands.push({ type: "set_strikethrough", enabled: true });
       } else if (code === SGR_NORMAL_INTENSITY) {
         this.bold = false;
         commands.push({ type: "set_bold", enabled: false });
         commands.push({ type: "set_dim", enabled: false });
+      } else if (code === SGR_NO_ITALIC) {
+        commands.push({ type: "set_italic", enabled: false });
+      } else if (code === SGR_NO_UNDERLINE) {
+        commands.push({ type: "set_underline", enabled: false });
       } else if (code === SGR_NO_REVERSE) {
         commands.push({ type: "set_reverse", enabled: false });
+      } else if (code === SGR_NO_STRIKETHROUGH) {
+        commands.push({ type: "set_strikethrough", enabled: false });
       } else if (code >= SGR_FG_BASE && code <= SGR_FG_END) {
         const colorIndex = code - SGR_FG_BASE;
         this.fgColor = this.bold
