@@ -29,7 +29,7 @@ export const MIN_ROWS = 10;
 // =============================================================================
 
 /** Default font size in points */
-export const DEFAULT_FONT_SIZE = 13;
+export const DEFAULT_FONT_SIZE = 11;
 
 // =============================================================================
 // Glyph Cache

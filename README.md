@@ -114,7 +114,7 @@ Creates stdin/stdout streams and a window for use with Ink.
 | `width`       | `number`         | `800`       | Window width in pixels                     |
 | `height`      | `number`         | `600`       | Window height in pixels                    |
 | `vsync`       | `boolean`        | `true`      | Enable vertical sync                       |
-| `fontSize`    | `number`         | `13`        | Font size in points                        |
+| `fontSize`    | `number`         | `11`        | Font size in points                        |
 | `scaleFactor` | `number \| null` | `null`      | Override scale factor (null = auto-detect) |
 
 #### Returns
