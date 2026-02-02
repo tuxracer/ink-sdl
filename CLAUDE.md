@@ -52,7 +52,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
 - **Arrow functions**: Use `const foo = () => { ... }` (enforced by ESLint, auto-fixable)
 - **Reserve `use` prefix for React hooks**: The `useFoo` naming convention is reserved for React hooks. For boolean options or flags, use names like `systemFont`, `enableCache`, or `withValidation` instead of `useSystemFont`, `useCache`, or `useValidation`
 - **Named imports**: Use `import { pipe, filter } from 'remeda'` not `import * as R` (tree-shaking)
-- **Remeda utilities**: Prefer for array/object manipulation over manual loops
+- **Remeda utilities**: Prefer for array/object manipulation over manual loops where it improves readability without hurting performance (e.g., `flatMap` to flatten nested loops, `find` for searching, `sortBy` for sorting)
 - **Named constants**: Use `const HEADER_SIZE = 16` not magic numbers
 - **Numeric separators**: Use underscore separators for numbers 1000 and above for readability (`1_500`, `44_100`, `100_000`)
 - **DRY (Don't Repeat Yourself)**: When a pattern appears 3+ times, extract it into a helper function. Place shared utilities in `src/utils/` (e.g., `src/utils/findLibrary/index.ts`). This improves readability and maintainability without impacting performance
