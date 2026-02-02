@@ -10,6 +10,7 @@
  *
  * Run with: npx tsx examples/hello.tsx
  * CLI options:
+ *   --terminal              Render to terminal instead of SDL window
  *   --title <string>        Window title
  *   --width <number>        Window width in pixels
  *   --height <number>       Window height in pixels
@@ -30,6 +31,7 @@ const { values: args } = parseArgs({
     height: { type: "string" },
     "font-size": { type: "string" },
     "scale-factor": { type: "string" },
+    terminal: { type: "boolean", default: false },
   },
 });
 
@@ -394,33 +396,39 @@ const App = ({
 // Setup and Render
 // ============================================================================
 
-const { stdin, stdout, window, renderer } = createSdlStreams({
-  title: args.title ?? "ink-sdl Demo",
-  width: args.width ? parseInt(args.width, 10) : 800,
-  height: args.height ? parseInt(args.height, 10) : 600,
-  fontSize: args["font-size"] ? parseInt(args["font-size"], 10) : undefined,
-  scaleFactor: args["scale-factor"]
-    ? parseFloat(args["scale-factor"])
-    : undefined,
-});
+if (args.terminal) {
+  // Terminal mode - render to the terminal instead of SDL window
+  render(<App scaleFactor={1} cacheStats={null} />);
+} else {
+  // SDL mode - render to an SDL window
+  const { stdin, stdout, window, renderer } = createSdlStreams({
+    title: args.title ?? "ink-sdl Demo",
+    width: args.width ? parseInt(args.width, 10) : 800,
+    height: args.height ? parseInt(args.height, 10) : 600,
+    fontSize: args["font-size"] ? parseInt(args["font-size"], 10) : undefined,
+    scaleFactor: args["scale-factor"]
+      ? parseFloat(args["scale-factor"])
+      : undefined,
+  });
 
-const scaleFactor = renderer.getScaleFactor();
-const cacheStats = window.getCacheStats();
+  const scaleFactor = renderer.getScaleFactor();
+  const cacheStats = window.getCacheStats();
 
-render(<App scaleFactor={scaleFactor} cacheStats={cacheStats} />, {
-  stdin,
-  stdout,
-});
+  render(<App scaleFactor={scaleFactor} cacheStats={cacheStats} />, {
+    stdin,
+    stdout,
+  });
 
-window.on("close", () => {
-  process.exit(0);
-});
+  window.on("close", () => {
+    process.exit(0);
+  });
 
-window.on("blur", () => {
-  // Could show a "paused" indicator here
-});
+  window.on("blur", () => {
+    // Could show a "paused" indicator here
+  });
 
-process.on("SIGINT", () => {
-  window.close();
-  process.exit(0);
-});
+  process.on("SIGINT", () => {
+    window.close();
+    process.exit(0);
+  });
+}
