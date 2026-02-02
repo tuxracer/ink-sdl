@@ -9,7 +9,8 @@ Render [Ink](https://github.com/vadimdemedes/ink) TUI applications to an SDL win
 - Window resizing with automatic terminal dimension updates
 - HiDPI/Retina display support
 - Glyph caching for efficient text rendering
-- Bundled monospace font (Cozette)
+- Bundled monospace font (Cozette) with system font option
+- Emoji support via platform font fallback
 
 ## Prerequisites
 
@@ -64,17 +65,21 @@ pnpm exec tsx examples/hello.tsx --font-size 20
 # Override scale factor (useful for HiDPI testing)
 pnpm exec tsx examples/hello.tsx --scale-factor 2.0
 
+# Use system font instead of bundled Cozette
+pnpm exec tsx examples/hello.tsx --system-font
+
 # All options
-pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-size 18 --scale-factor 1.5
+pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-size 18 --scale-factor 1.5 --system-font
 ```
 
-| Flag             | Description                         |
-| ---------------- | ----------------------------------- |
-| `--title`        | Window title                        |
-| `--width`        | Window width in pixels              |
-| `--height`       | Window height in pixels             |
-| `--font-size`    | Font size in points                 |
-| `--scale-factor` | Scale factor (omit for auto-detect) |
+| Flag             | Description                                  |
+| ---------------- | -------------------------------------------- |
+| `--title`        | Window title                                 |
+| `--width`        | Window width in pixels                       |
+| `--height`       | Window height in pixels                      |
+| `--font-size`    | Font size in points                          |
+| `--scale-factor` | Scale factor (omit for auto-detect)          |
+| `--system-font`  | Use system monospace font instead of Cozette |
 
 > **Note:** This project uses [pnpm](https://pnpm.io/) for development. You can install and use ink-sdl in your own project with npm or pnpm, but if you're contributing to the library itself, use pnpm.
 
@@ -129,14 +134,15 @@ Creates stdin/stdout streams and a window for use with Ink.
 
 #### Options
 
-| Option        | Type             | Default     | Description                                |
-| ------------- | ---------------- | ----------- | ------------------------------------------ |
-| `title`       | `string`         | `"ink-sdl"` | Window title                               |
-| `width`       | `number`         | `800`       | Window width in pixels                     |
-| `height`      | `number`         | `600`       | Window height in pixels                    |
-| `vsync`       | `boolean`        | `true`      | Enable vertical sync                       |
-| `fontSize`    | `number`         | `16`        | Font size in points                        |
-| `scaleFactor` | `number \| null` | `null`      | Override scale factor (null = auto-detect) |
+| Option        | Type             | Default     | Description                                  |
+| ------------- | ---------------- | ----------- | -------------------------------------------- |
+| `title`       | `string`         | `"ink-sdl"` | Window title                                 |
+| `width`       | `number`         | `800`       | Window width in pixels                       |
+| `height`      | `number`         | `600`       | Window height in pixels                      |
+| `vsync`       | `boolean`        | `true`      | Enable vertical sync                         |
+| `fontSize`    | `number`         | `16`        | Font size in points                          |
+| `scaleFactor` | `number \| null` | `null`      | Override scale factor (null = auto-detect)   |
+| `systemFont`  | `boolean`        | `false`     | Use system monospace font instead of Cozette |
 
 #### Returns
 
