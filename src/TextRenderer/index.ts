@@ -47,6 +47,16 @@ const findFirstExisting = (paths: string[]): string | null => {
 };
 
 /**
+ * Get platform-specific paths from a path map
+ */
+const getPlatformPaths = (
+  pathMap: Record<string, readonly string[]>
+): string[] => {
+  const plat = platform();
+  return [...(pathMap[plat] ?? [])];
+};
+
+/**
  * Cached glyph texture with metadata
  */
 interface CachedGlyph {
@@ -213,17 +223,7 @@ export class TextRenderer {
    * Get fallback fonts for the current platform
    */
   private getFallbackFontPaths(): string[] {
-    const plat = platform();
-    if (plat === "darwin") {
-      return [...FALLBACK_FONTS.darwin];
-    }
-    if (plat === "linux") {
-      return [...FALLBACK_FONTS.linux];
-    }
-    if (plat === "win32") {
-      return [...FALLBACK_FONTS.win32];
-    }
-    return [];
+    return getPlatformPaths(FALLBACK_FONTS);
   }
 
   /**
@@ -255,17 +255,7 @@ export class TextRenderer {
    * Get emoji font paths for the current platform
    */
   private getEmojiFontPaths(): string[] {
-    const plat = platform();
-    if (plat === "darwin") {
-      return [...EMOJI_FONTS.darwin];
-    }
-    if (plat === "linux") {
-      return [...EMOJI_FONTS.linux];
-    }
-    if (plat === "win32") {
-      return [...EMOJI_FONTS.win32];
-    }
-    return [];
+    return getPlatformPaths(EMOJI_FONTS);
   }
 
   /**
