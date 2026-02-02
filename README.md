@@ -78,16 +78,21 @@ pnpm exec tsx examples/hello.tsx --font-name Menlo
 pnpm exec tsx examples/hello.tsx --title "Test" --width 800 --height 600 --font-size 18 --scale-factor 1.5 --system-font
 ```
 
-| Flag             | Description                                  |
-| ---------------- | -------------------------------------------- |
-| `--title`        | Window title                                 |
-| `--width`        | Window width in pixels                       |
-| `--height`       | Window height in pixels                      |
-| `--font`         | Path to a custom TTF font file               |
-| `--font-name`    | Font name to find in system directories      |
-| `--font-size`    | Font size in points                          |
-| `--scale-factor` | Scale factor (omit for auto-detect)          |
-| `--system-font`  | Use system monospace font instead of Cozette |
+| Flag             | Description                                                 |
+| ---------------- | ----------------------------------------------------------- |
+| `--title`        | Window title                                                |
+| `--width`        | Window width in pixels                                      |
+| `--height`       | Window height in pixels                                     |
+| `--font`         | Path to a custom TTF font file                              |
+| `--font-name`    | Font name to find in system directories                     |
+| `--font-size`    | Font size in points                                         |
+| `--scale-factor` | Scale factor (omit for auto-detect)                         |
+| `--system-font`  | Use system monospace font instead of Cozette                |
+| `--background`   | Background color as hex (e.g., "#1a1a2e")                   |
+| `--fullscreen`   | Enable fullscreen mode ("true" or "desktop" for borderless) |
+| `--borderless`   | Remove window decorations                                   |
+| `--min-width`    | Minimum window width in pixels                              |
+| `--min-height`   | Minimum window height in pixels                             |
 
 > **Note:** This project uses [pnpm](https://pnpm.io/) for development. You can install and use ink-sdl in your own project with npm or pnpm, but if you're contributing to the library itself, use pnpm.
 
@@ -142,17 +147,22 @@ Creates stdin/stdout streams and a window for use with Ink.
 
 #### Options
 
-| Option        | Type             | Default     | Description                                  |
-| ------------- | ---------------- | ----------- | -------------------------------------------- |
-| `title`       | `string`         | `"ink-sdl"` | Window title                                 |
-| `width`       | `number`         | `800`       | Window width in pixels                       |
-| `height`      | `number`         | `600`       | Window height in pixels                      |
-| `vsync`       | `boolean`        | `true`      | Enable vertical sync                         |
-| `fontSize`    | `number`         | `16`        | Font size in points                          |
-| `scaleFactor` | `number \| null` | `null`      | Override scale factor (null = auto-detect)   |
-| `systemFont`  | `boolean`        | `false`     | Use system monospace font instead of Cozette |
-| `fontPath`    | `string`         | `undefined` | Path to a custom TTF font file               |
-| `fontName`    | `string`         | `undefined` | Font name to find in system directories      |
+| Option            | Type                                 | Default     | Description                                                |
+| ----------------- | ------------------------------------ | ----------- | ---------------------------------------------------------- |
+| `title`           | `string`                             | `"ink-sdl"` | Window title                                               |
+| `width`           | `number`                             | `800`       | Window width in pixels                                     |
+| `height`          | `number`                             | `600`       | Window height in pixels                                    |
+| `vsync`           | `boolean`                            | `true`      | Enable vertical sync                                       |
+| `fontSize`        | `number`                             | `16`        | Font size in points                                        |
+| `scaleFactor`     | `number \| null`                     | `null`      | Override scale factor (null = auto-detect)                 |
+| `systemFont`      | `boolean`                            | `false`     | Use system monospace font instead of Cozette               |
+| `fontPath`        | `string`                             | `undefined` | Path to a custom TTF font file                             |
+| `fontName`        | `string`                             | `undefined` | Font name to find in system directories                    |
+| `backgroundColor` | `[number, number, number] \| string` | `[0, 0, 0]` | Background color as RGB tuple or hex string "#RRGGBB"      |
+| `fullscreen`      | `boolean \| "desktop"`               | `undefined` | Fullscreen mode (true = exclusive, "desktop" = borderless) |
+| `borderless`      | `boolean`                            | `false`     | Remove window decorations (title bar, borders)             |
+| `minWidth`        | `number`                             | `undefined` | Minimum window width in pixels                             |
+| `minHeight`       | `number`                             | `undefined` | Minimum window height in pixels                            |
 
 #### Returns
 

@@ -19,6 +19,11 @@
  *   --height <number>       Window height in pixels
  *   --font-size <number>    Font size in points
  *   --scale-factor <number> Scale factor (omit for auto-detect)
+ *   --background <hex>      Background color (e.g., "#1a1a2e")
+ *   --fullscreen <mode>     Fullscreen mode ("true" or "desktop")
+ *   --borderless            Remove window decorations
+ *   --min-width <number>    Minimum window width in pixels
+ *   --min-height <number>   Minimum window height in pixels
  */
 
 import { parseArgs } from "node:util";
@@ -38,6 +43,11 @@ const { values: args } = parseArgs({
     "scale-factor": { type: "string" },
     "system-font": { type: "boolean", default: false },
     terminal: { type: "boolean", default: false },
+    background: { type: "string" },
+    fullscreen: { type: "string" },
+    borderless: { type: "boolean", default: false },
+    "min-width": { type: "string" },
+    "min-height": { type: "string" },
   },
 });
 
@@ -415,6 +425,15 @@ if (args.terminal) {
   // Terminal mode - render to the terminal instead of SDL window
   render(<App scaleFactor={1} cacheStats={null} />);
 } else {
+  // Parse fullscreen option: "true" -> true, "desktop" -> "desktop", anything else -> undefined
+  const parseFullscreen = (
+    value: string | undefined
+  ): boolean | "desktop" | undefined => {
+    if (value === "true") return true;
+    if (value === "desktop") return "desktop";
+    return undefined;
+  };
+
   // SDL mode - render to an SDL window
   const { stdin, stdout, window, renderer } = createSdlStreams({
     title: args.title ?? "ink-sdl Demo",
@@ -427,6 +446,11 @@ if (args.terminal) {
     systemFont: args["system-font"],
     fontPath: args.font,
     fontName: args["font-name"],
+    backgroundColor: args.background,
+    fullscreen: parseFullscreen(args.fullscreen),
+    borderless: args.borderless,
+    minWidth: args["min-width"] ? parseInt(args["min-width"], 10) : undefined,
+    minHeight: args["min-height"] ? parseInt(args["min-height"], 10) : undefined,
   });
 
   const scaleFactor = renderer.getScaleFactor();

@@ -110,6 +110,16 @@ export class Sdl2 {
     h: Buffer
   ) => void;
   private _SDL_RaiseWindow!: (window: SDLPointer) => void;
+  private _SDL_SetWindowMinimumSize!: (
+    window: SDLPointer,
+    minW: number,
+    minH: number
+  ) => void;
+  private _SDL_SetWindowMaximumSize!: (
+    window: SDLPointer,
+    maxW: number,
+    maxH: number
+  ) => void;
 
   // Renderer functions
   private _SDL_CreateRenderer!: (
@@ -234,6 +244,12 @@ export class Sdl2 {
       "void SDL_GetWindowSize(void* window, int* w, int* h)"
     );
     this._SDL_RaiseWindow = this.lib.func("void SDL_RaiseWindow(void* window)");
+    this._SDL_SetWindowMinimumSize = this.lib.func(
+      "void SDL_SetWindowMinimumSize(void* window, int min_w, int min_h)"
+    );
+    this._SDL_SetWindowMaximumSize = this.lib.func(
+      "void SDL_SetWindowMaximumSize(void* window, int max_w, int max_h)"
+    );
 
     // Renderer
     this._SDL_CreateRenderer = this.lib.func(
@@ -384,6 +400,20 @@ export class Sdl2 {
    */
   raiseWindow(window: SDLPointer): void {
     this._SDL_RaiseWindow(window);
+  }
+
+  /**
+   * Set the minimum size of a window
+   */
+  setWindowMinimumSize(window: SDLPointer, minW: number, minH: number): void {
+    this._SDL_SetWindowMinimumSize(window, minW, minH);
+  }
+
+  /**
+   * Set the maximum size of a window
+   */
+  setWindowMaximumSize(window: SDLPointer, maxW: number, maxH: number): void {
+    this._SDL_SetWindowMaximumSize(window, maxW, maxH);
   }
 
   /**

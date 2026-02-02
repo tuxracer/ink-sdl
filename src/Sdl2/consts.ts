@@ -19,14 +19,27 @@ export const SDL_INIT_EVENTS = 0x00004000;
 // SDL Window Flags
 // =============================================================================
 
+/** Fullscreen window (changes display mode) */
+export const SDL_WINDOW_FULLSCREEN = 0x00000001;
+
 /** Show window immediately */
 export const SDL_WINDOW_SHOWN = 0x00000004;
+
+/** Window has no decorations (borderless) */
+export const SDL_WINDOW_BORDERLESS = 0x00000010;
 
 /** Window can be resized */
 export const SDL_WINDOW_RESIZABLE = 0x00000020;
 
 /** Enable HiDPI support */
 export const SDL_WINDOW_ALLOW_HIGHDPI = 0x00002000;
+
+/** Desktop fullscreen modifier flag */
+const SDL_WINDOW_FULLSCREEN_DESKTOP_MODIFIER = 0x00001000;
+
+/** Fullscreen window at desktop resolution (borderless fullscreen) */
+export const SDL_WINDOW_FULLSCREEN_DESKTOP =
+  SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP_MODIFIER;
 
 /** Center window on screen */
 export const SDL_WINDOWPOS_CENTERED = 0x2fff0000;

@@ -12,6 +12,9 @@ import {
   SDL_WINDOW_SHOWN,
   SDL_WINDOW_RESIZABLE,
   SDL_WINDOW_ALLOW_HIGHDPI,
+  SDL_WINDOW_FULLSCREEN,
+  SDL_WINDOW_FULLSCREEN_DESKTOP,
+  SDL_WINDOW_BORDERLESS,
   SDL_WINDOWPOS_CENTERED,
   SDL_RENDERER_ACCELERATED,
   SDL_RENDERER_PRESENTVSYNC,
@@ -59,6 +62,41 @@ const DEFAULT_FG: Color = { r: 255, g: 255, b: 255 };
 /** Minimum brightness for text visibility */
 const MIN_BRIGHTNESS = 100;
 
+/** Length of a 6-character hex color string (RRGGBB) */
+const HEX_COLOR_LENGTH = 6;
+
+/** Slice indices for parsing hex color channels */
+const HEX_R_END = 2;
+const HEX_G_END = 4;
+
+/**
+ * Parse a background color from various formats
+ */
+const parseBackgroundColor = (
+  color: [number, number, number] | string | undefined
+): Color => {
+  if (!color) {
+    return { ...DEFAULT_BG };
+  }
+
+  if (Array.isArray(color)) {
+    return { r: color[0], g: color[1], b: color[2] };
+  }
+
+  // Parse hex string "#RRGGBB" or "RRGGBB"
+  const hex = color.startsWith("#") ? color.slice(1) : color;
+  if (hex.length === HEX_COLOR_LENGTH) {
+    const r = parseInt(hex.slice(0, HEX_R_END), 16);
+    const g = parseInt(hex.slice(HEX_R_END, HEX_G_END), 16);
+    const b = parseInt(hex.slice(HEX_G_END), 16);
+    if (!isNaN(r) && !isNaN(g) && !isNaN(b)) {
+      return { r, g, b };
+    }
+  }
+
+  return { ...DEFAULT_BG };
+};
+
 export interface SdlUiRendererOptions {
   width?: number;
   height?: number;
@@ -72,6 +110,16 @@ export interface SdlUiRendererOptions {
   fontPath?: string;
   /** Font name to search for in system font directories */
   fontName?: string;
+  /** Background color as RGB tuple [r, g, b] or hex string "#RRGGBB" */
+  backgroundColor?: [number, number, number] | string;
+  /** Fullscreen mode: true for exclusive fullscreen, "desktop" for borderless fullscreen */
+  fullscreen?: boolean | "desktop";
+  /** Remove window decorations (title bar, borders) */
+  borderless?: boolean;
+  /** Minimum window width in pixels */
+  minWidth?: number;
+  /** Minimum window height in pixels */
+  minHeight?: number;
 }
 
 /** Result from processing SDL events */
@@ -109,6 +157,7 @@ export class SdlUiRenderer {
 
   private fgColor: Color = { ...DEFAULT_FG };
   private bgColor: Color = { ...DEFAULT_BG };
+  private defaultBgColor: Color = { ...DEFAULT_BG };
   private bold = false;
   private dim = false;
   private italic = false;
@@ -142,6 +191,30 @@ export class SdlUiRenderer {
       throw new Error("Failed to initialize SDL2 for UI rendering");
     }
 
+    // Parse background color
+    this.defaultBgColor = parseBackgroundColor(options.backgroundColor);
+    this.bgColor = { ...this.defaultBgColor };
+
+    // Build window flags
+    let windowFlags = SDL_WINDOW_SHOWN | SDL_WINDOW_ALLOW_HIGHDPI;
+
+    // Add resizable flag unless fullscreen (fullscreen windows can't be resized)
+    if (!options.fullscreen) {
+      windowFlags |= SDL_WINDOW_RESIZABLE;
+    }
+
+    // Handle fullscreen modes
+    if (options.fullscreen === "desktop") {
+      windowFlags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+    } else if (options.fullscreen === true) {
+      windowFlags |= SDL_WINDOW_FULLSCREEN;
+    }
+
+    // Handle borderless (only if not fullscreen, which is already borderless)
+    if (options.borderless && !options.fullscreen) {
+      windowFlags |= SDL_WINDOW_BORDERLESS;
+    }
+
     // Create window
     this.window = this.sdl.createWindow(
       options.title ?? "ink-sdl",
@@ -149,8 +222,15 @@ export class SdlUiRenderer {
       SDL_WINDOWPOS_CENTERED,
       this.windowWidth,
       this.windowHeight,
-      SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI
+      windowFlags
     );
+
+    // Set minimum window size if specified
+    if (options.minWidth !== undefined || options.minHeight !== undefined) {
+      const minW = options.minWidth ?? 1;
+      const minH = options.minHeight ?? 1;
+      this.sdl.setWindowMinimumSize(this.window, minW, minH);
+    }
 
     // Create renderer
     const rendererFlags =
@@ -198,9 +278,9 @@ export class SdlUiRenderer {
     // Set background color
     this.sdl.setRenderDrawColor(
       this.renderer,
-      DEFAULT_BG.r,
-      DEFAULT_BG.g,
-      DEFAULT_BG.b,
+      this.defaultBgColor.r,
+      this.defaultBgColor.g,
+      this.defaultBgColor.b,
       COLOR_CHANNEL_MAX
     );
 
@@ -349,9 +429,9 @@ export class SdlUiRenderer {
         // Clear the render target directly (don't call clear() which resets render target)
         this.sdl.setRenderDrawColor(
           this.renderer!,
-          DEFAULT_BG.r,
-          DEFAULT_BG.g,
-          DEFAULT_BG.b,
+          this.defaultBgColor.r,
+          this.defaultBgColor.g,
+          this.defaultBgColor.b,
           COLOR_CHANNEL_MAX
         );
         this.sdl.renderClear(this.renderer!);
@@ -379,7 +459,7 @@ export class SdlUiRenderer {
 
       case "reset_style":
         this.fgColor = { ...DEFAULT_FG };
-        this.bgColor = { ...DEFAULT_BG };
+        this.bgColor = { ...this.defaultBgColor };
         this.bold = false;
         this.dim = false;
         this.italic = false;
@@ -539,9 +619,9 @@ export class SdlUiRenderer {
     this.sdl.setRenderTarget(this.renderer, this.renderTarget);
     this.sdl.setRenderDrawColor(
       this.renderer,
-      DEFAULT_BG.r,
-      DEFAULT_BG.g,
-      DEFAULT_BG.b,
+      this.defaultBgColor.r,
+      this.defaultBgColor.g,
+      this.defaultBgColor.b,
       COLOR_CHANNEL_MAX
     );
     this.sdl.renderClear(this.renderer);
@@ -763,7 +843,7 @@ export class SdlUiRenderer {
     this.shouldQuit = false;
     this.pendingCommands = [];
     this.fgColor = { ...DEFAULT_FG };
-    this.bgColor = { ...DEFAULT_BG };
+    this.bgColor = { ...this.defaultBgColor };
     this.bold = false;
     this.dim = false;
     this.italic = false;

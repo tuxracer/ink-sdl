@@ -34,6 +34,16 @@ export interface SdlStreamsOptions {
   fontPath?: string;
   /** Font name to search for in system font directories */
   fontName?: string;
+  /** Background color as RGB tuple [r, g, b] or hex string "#RRGGBB" */
+  backgroundColor?: [number, number, number] | string;
+  /** Fullscreen mode: true for exclusive fullscreen, "desktop" for borderless fullscreen */
+  fullscreen?: boolean | "desktop";
+  /** Remove window decorations (title bar, borders) */
+  borderless?: boolean;
+  /** Minimum window width in pixels */
+  minWidth?: number;
+  /** Minimum window height in pixels */
+  minHeight?: number;
 }
 
 /**
