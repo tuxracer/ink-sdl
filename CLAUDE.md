@@ -1,5 +1,18 @@
 # Ink SDL
 
+A library for rendering [Ink](https://github.com/vadimdemedes/ink) TUI applications to an SDL window instead of the terminal. This enables building graphical applications using React/Ink's declarative paradigm with SDL's windowing and rendering capabilities.
+
+See [README.md](README.md) for installation prerequisites, API documentation, and usage examples. See [docs/TRD.md](docs/TRD.md) for technical details including architecture, ANSI sequence support, and keyboard input mapping.
+
+## Source Structure
+
+- `src/streams/` - Main API (`createSdlStreams`), SdlWindow, input/output streams
+- `src/renderer/` - ANSI parsing (`AnsiParser`) and SDL rendering (`SdlUiRenderer`, `TextRenderer`)
+- `src/input/` - Keyboard input conversion (`InputBridge`: SDL keycodes → terminal sequences)
+- `src/sdl/` - FFI bindings to SDL2/SDL2_ttf via koffi
+- `src/fonts/` - Bundled Cozette font
+- `examples/` - Example applications
+
 ## Commands
 
 ```bash
