@@ -31,6 +31,22 @@ import {
 } from "./consts";
 
 /**
+ * Find the first existing path from a list of candidates
+ */
+const findFirstExisting = (paths: string[]): string | null => {
+  for (const p of paths) {
+    try {
+      if (existsSync(p)) {
+        return p;
+      }
+    } catch {
+      // Continue to next path
+    }
+  }
+  return null;
+};
+
+/**
  * Cached glyph texture with metadata
  */
 interface CachedGlyph {
@@ -174,14 +190,9 @@ export class TextRenderer {
    */
   private getDefaultFontPath(): string {
     // First, check system font directories
-    for (const p of this.getSystemFontPaths()) {
-      try {
-        if (existsSync(p)) {
-          return p;
-        }
-      } catch {
-        // Continue to next path
-      }
+    const systemPath = findFirstExisting(this.getSystemFontPaths());
+    if (systemPath) {
+      return systemPath;
     }
 
     // Fall back to bundled font
@@ -194,18 +205,8 @@ export class TextRenderer {
       resolve(currentDirname, "../fonts", DEFAULT_FONT_FILENAME), // Alternate
     ];
 
-    for (const p of bundledPaths) {
-      try {
-        if (existsSync(p)) {
-          return p;
-        }
-      } catch {
-        // Continue to next path
-      }
-    }
-
-    // Fallback: return first bundled path (will error if not found)
-    return bundledPaths[0]!;
+    // Return first existing bundled path, or first path (will error if not found)
+    return findFirstExisting(bundledPaths) ?? bundledPaths[0]!;
   }
 
   /**
@@ -231,46 +232,23 @@ export class TextRenderer {
   private findAvailableFont(): string {
     // Try the default Cozette font first
     const defaultPath = this.getDefaultFontPath();
-    try {
-      if (existsSync(defaultPath)) {
-        return defaultPath;
-      }
-    } catch {
-      // Continue to fallbacks
-    }
 
-    // Try platform-specific fallback fonts
-    for (const fallbackPath of this.getFallbackFontPaths()) {
-      try {
-        if (existsSync(fallbackPath)) {
-          return fallbackPath;
-        }
-      } catch {
-        // Continue to next fallback
-      }
-    }
-
-    // Return default path even if it doesn't exist - loadFont will handle the error
-    return defaultPath;
+    // Try default, then platform-specific fallbacks
+    return (
+      findFirstExisting([defaultPath, ...this.getFallbackFontPaths()]) ??
+      defaultPath
+    );
   }
 
   /**
    * Find a system font, skipping the default bundled font
    */
   private findSystemFont(): string {
-    // Only try platform-specific fallback fonts
-    for (const fallbackPath of this.getFallbackFontPaths()) {
-      try {
-        if (existsSync(fallbackPath)) {
-          return fallbackPath;
-        }
-      } catch {
-        // Continue to next fallback
-      }
-    }
-
-    // If no system font found, fall back to the default
-    return this.getDefaultFontPath();
+    // Try platform-specific fallback fonts, fall back to default if none found
+    return (
+      findFirstExisting(this.getFallbackFontPaths()) ??
+      this.getDefaultFontPath()
+    );
   }
 
   /**
@@ -294,16 +272,7 @@ export class TextRenderer {
    * Find an available emoji font
    */
   private findEmojiFont(): string | null {
-    for (const fontPath of this.getEmojiFontPaths()) {
-      try {
-        if (existsSync(fontPath)) {
-          return fontPath;
-        }
-      } catch {
-        // Continue to next path
-      }
-    }
-    return null;
+    return findFirstExisting(this.getEmojiFontPaths());
   }
 
   /**
