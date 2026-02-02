@@ -35,7 +35,10 @@ dnf install SDL2 SDL2_ttf
 ```
 
 **Windows:**
-Download SDL2.dll and SDL2_ttf.dll from [libsdl.org](https://libsdl.org) and place them in your system path.
+Download the runtime binaries and place the DLLs in your system path or project directory:
+
+- [SDL2.dll](https://github.com/libsdl-org/SDL/releases/tag/release-2.24.0) (download `SDL2-2.24.0-win32-x64.zip`)
+- [SDL2_ttf.dll](https://github.com/libsdl-org/SDL_ttf/releases/tag/release-2.24.0) (download `SDL2_ttf-2.24.0-win32-x64.zip`)
 
 ## Installation
 
