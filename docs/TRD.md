@@ -450,25 +450,44 @@ If SDL is unavailable, the package should provide clear error messages with inst
 
 ## Package Structure
 
+Each module is a directory named after its primary export, containing `index.ts` and optionally `consts.ts` for module-specific constants:
+
 ```
 ink-sdl/
 ├── src/
-│   ├── index.ts              # Public API exports
-│   ├── streams/
-│   │   ├── index.ts          # createSdlStreams()
-│   │   ├── output-stream.ts  # SdlOutputStream
-│   │   └── input-stream.ts   # SdlInputStream
-│   ├── renderer/
-│   │   ├── index.ts          # SdlUiRenderer
-│   │   ├── ansi-parser.ts    # ANSI parsing
-│   │   └── text-renderer.ts  # TTF rendering
-│   ├── input/
-│   │   └── input-bridge.ts   # SDL → terminal keys
-│   ├── sdl/
-│   │   ├── bindings.ts       # koffi SDL2 bindings
-│   │   └── types.ts          # SDL type definitions
+│   ├── index.ts                # Public API exports
+│   ├── consts.ts               # Shared constants
+│   ├── SdlWindow/
+│   │   ├── index.ts            # createSdlStreams(), SdlWindow
+│   │   └── consts.ts
+│   ├── SdlOutputStream/
+│   │   └── index.ts            # Writable stream for ANSI output
+│   ├── SdlInputStream/
+│   │   └── index.ts            # Readable stream for keyboard input
+│   ├── SdlUiRenderer/
+│   │   ├── index.ts            # SDL window and rendering management
+│   │   └── consts.ts
+│   ├── AnsiParser/
+│   │   ├── index.ts            # ANSI escape sequence parsing
+│   │   ├── index.test.ts
+│   │   └── consts.ts
+│   ├── TextRenderer/
+│   │   ├── index.ts            # TTF font loading and glyph caching
+│   │   └── consts.ts
+│   ├── InputBridge/
+│   │   ├── index.ts            # SDL keycodes → terminal sequences
+│   │   ├── index.test.ts
+│   │   └── consts.ts
+│   ├── Sdl2/
+│   │   ├── index.ts            # FFI bindings to SDL2 via koffi
+│   │   ├── consts.ts
+│   │   └── types.ts
+│   ├── SdlTtf/
+│   │   └── index.ts            # FFI bindings to SDL2_ttf via koffi
 │   └── fonts/
-│       └── CozetteVector.ttf # Bundled font
+│       └── CozetteVector.ttf   # Bundled font
+├── examples/
+│   └── ...                     # Example applications
 ├── docs/
 │   └── TRD.md
 ├── package.json
