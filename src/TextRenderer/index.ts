@@ -5,9 +5,10 @@
  * for efficient SDL UI rendering.
  */
 
-import { resolve, dirname } from "path";
+import { resolve, dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
+import { platform, homedir } from "os";
 import { sortBy, take } from "remeda";
 import { getSdl2, createSDLRect, SDL_BLENDMODE_BLEND } from "../Sdl2";
 import { getSdlTtf } from "../SdlTtf";
@@ -19,6 +20,7 @@ import {
   SCALE_FACTOR_EPSILON,
 } from "../consts";
 import {
+  DEFAULT_FONT_FILENAME,
   MAX_GLYPH_CACHE_SIZE,
   GLYPH_CACHE_EVICT_DIVISOR,
   PACK_RED_SHIFT,
@@ -76,22 +78,42 @@ export class TextRenderer {
   }
 
   /**
-   * Get the path to the bundled Cozette font
+   * Get system font directories for the current platform
+   */
+  private getSystemFontPaths(): string[] {
+    const home = homedir();
+    const plat = platform();
+
+    if (plat === "darwin") {
+      return [
+        join(home, "Library/Fonts", DEFAULT_FONT_FILENAME),
+        join("/Library/Fonts", DEFAULT_FONT_FILENAME),
+        join("/System/Library/Fonts", DEFAULT_FONT_FILENAME),
+      ];
+    }
+
+    if (plat === "linux") {
+      return [
+        join(home, ".fonts", DEFAULT_FONT_FILENAME),
+        join(home, ".local/share/fonts", DEFAULT_FONT_FILENAME),
+        join("/usr/share/fonts/truetype", DEFAULT_FONT_FILENAME),
+        join("/usr/local/share/fonts", DEFAULT_FONT_FILENAME),
+      ];
+    }
+
+    if (plat === "win32") {
+      return [join("C:\\Windows\\Fonts", DEFAULT_FONT_FILENAME)];
+    }
+
+    return [];
+  }
+
+  /**
+   * Get the path to the Cozette font (system or bundled)
    */
   private getDefaultFontPath(): string {
-    const currentFilename = fileURLToPath(import.meta.url);
-    const currentDirname = dirname(currentFilename);
-
-    // Try multiple locations:
-    // 1. Development: fonts/ at project root relative to this file
-    // 2. Bundled: fonts/ relative to dist
-    const paths = [
-      resolve(currentDirname, "../../fonts/CozetteVector.ttf"), // Dev path
-      resolve(currentDirname, "./fonts/CozetteVector.ttf"), // Bundled (dist)
-      resolve(currentDirname, "../fonts/CozetteVector.ttf"), // Alternate
-    ];
-
-    for (const p of paths) {
+    // First, check system font directories
+    for (const p of this.getSystemFontPaths()) {
       try {
         if (existsSync(p)) {
           return p;
@@ -101,8 +123,28 @@ export class TextRenderer {
       }
     }
 
-    // Fallback: return first path (will error if not found)
-    return paths[0]!;
+    // Fall back to bundled font
+    const currentFilename = fileURLToPath(import.meta.url);
+    const currentDirname = dirname(currentFilename);
+
+    const bundledPaths = [
+      resolve(currentDirname, "../../fonts", DEFAULT_FONT_FILENAME), // Dev path
+      resolve(currentDirname, "./fonts", DEFAULT_FONT_FILENAME), // Bundled (dist)
+      resolve(currentDirname, "../fonts", DEFAULT_FONT_FILENAME), // Alternate
+    ];
+
+    for (const p of bundledPaths) {
+      try {
+        if (existsSync(p)) {
+          return p;
+        }
+      } catch {
+        // Continue to next path
+      }
+    }
+
+    // Fallback: return first bundled path (will error if not found)
+    return bundledPaths[0]!;
   }
 
   /**

@@ -2,6 +2,9 @@
  * TextRenderer Constants
  */
 
+/** Default font filename */
+export const DEFAULT_FONT_FILENAME = "CozetteVector.ttf";
+
 /** Maximum number of glyphs to cache */
 export const MAX_GLYPH_CACHE_SIZE = 1000;
 
