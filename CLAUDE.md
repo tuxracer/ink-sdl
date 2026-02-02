@@ -33,6 +33,8 @@ pnpm check      # Format, lint, and typecheck (run before commits)
 
 **Important**: Always run `pnpm run check` before commits to ensure code is properly formatted, linted, and type-safe. Do not run formatting, linting, or typechecking separately.
 
+**Documentation**: When making major changes (architecture, new modules, API changes, file structure), update [docs/TRD.md](docs/TRD.md) to keep the technical reference accurate.
+
 ## Tech Stack
 
 - **Runtime**: Node.js 24+
