@@ -8,6 +8,7 @@
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
 import { existsSync } from "fs";
+import { sortBy, take } from "remeda";
 import {
   getSDL2,
   getSDL_ttf,
@@ -238,19 +239,18 @@ export class TextRenderer {
    * Evict least recently used glyphs
    */
   private evictOldGlyphs(): void {
-    const entries = [...this.glyphCache.entries()];
-    entries.sort((a, b) => a[1].lastUsed - b[1].lastUsed);
+    const entries = sortBy(
+      [...this.glyphCache.entries()],
+      ([, glyph]) => glyph.lastUsed
+    );
 
     const removeCount = Math.floor(
       MAX_GLYPH_CACHE_SIZE / GLYPH_CACHE_EVICT_DIVISOR
     );
-    for (let i = 0; i < removeCount && i < entries.length; i++) {
-      const entry = entries[i];
-      if (entry) {
-        const [key, glyph] = entry;
-        this.sdl.destroyTexture(glyph.texture);
-        this.glyphCache.delete(key);
-      }
+
+    for (const [key, glyph] of take(entries, removeCount)) {
+      this.sdl.destroyTexture(glyph.texture);
+      this.glyphCache.delete(key);
     }
   }
 

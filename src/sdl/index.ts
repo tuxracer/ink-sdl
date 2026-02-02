@@ -8,6 +8,7 @@
 import koffi from "koffi";
 import { platform } from "os";
 import { existsSync } from "fs";
+import { find, last } from "remeda";
 import type { SDLPointer } from "./types";
 import {
   INT32_BYTES,
@@ -68,23 +69,23 @@ const SDL_TTF_LIB_PATHS: Record<string, string[]> = {
 };
 
 /**
+ * Check if a path is a system path (no directory, let koffi search)
+ */
+const isSystemPath = (p: string): boolean =>
+  !p.includes("/") && !p.includes("\\");
+
+/**
  * Find a library path for the current platform
  */
 const findLibrary = (pathMap: Record<string, string[]>): string | null => {
   const plat = platform();
   const paths = pathMap[plat] ?? [];
 
-  for (const path of paths) {
-    // For paths without directory, let koffi search system paths
-    if (!path.includes("/") && !path.includes("\\")) {
-      return path;
-    }
-    if (existsSync(path)) {
-      return path;
-    }
-  }
+  // Try paths in order: system paths are accepted immediately,
+  // paths with directories must exist on disk
+  const foundPath = find(paths, (p) => isSystemPath(p) || existsSync(p));
 
-  return paths[paths.length - 1] ?? null;
+  return foundPath ?? last(paths) ?? null;
 };
 
 /**

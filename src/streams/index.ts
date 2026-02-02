@@ -5,6 +5,7 @@
  */
 
 import { EventEmitter } from "events";
+import { pickBy, isDefined } from "remeda";
 import { SdlUiRenderer, type SdlUiRendererOptions } from "../renderer";
 import { SdlOutputStream } from "./output-stream";
 import { SdlInputStream } from "./input-stream";
@@ -189,26 +190,8 @@ export interface SdlStreams {
 export const createSdlStreams = (
   options: SdlStreamsOptions = {}
 ): SdlStreams => {
-  // Create the UI renderer - only include defined options
-  const rendererOptions: SdlUiRendererOptions = {};
-  if (options.title !== undefined) {
-    rendererOptions.title = options.title;
-  }
-  if (options.width !== undefined) {
-    rendererOptions.width = options.width;
-  }
-  if (options.height !== undefined) {
-    rendererOptions.height = options.height;
-  }
-  if (options.vsync !== undefined) {
-    rendererOptions.vsync = options.vsync;
-  }
-  if (options.fontSize !== undefined) {
-    rendererOptions.fontSize = options.fontSize;
-  }
-  if (options.scaleFactor !== undefined) {
-    rendererOptions.scaleFactor = options.scaleFactor;
-  }
+  // Create the UI renderer - filter out undefined options
+  const rendererOptions = pickBy(options, isDefined) as SdlUiRendererOptions;
 
   const renderer = new SdlUiRenderer(rendererOptions);
 

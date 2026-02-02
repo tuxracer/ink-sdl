@@ -6,6 +6,7 @@
  */
 
 import { Writable } from "stream";
+import { isString } from "remeda";
 import type { SdlUiRenderer } from "../renderer";
 
 /** Default terminal dimensions */
@@ -64,7 +65,7 @@ export class SdlOutputStream extends Writable {
     callback: (error?: Error | null) => void
   ): void {
     try {
-      const text = typeof chunk === "string" ? chunk : chunk.toString("utf8");
+      const text = isString(chunk) ? chunk : chunk.toString("utf8");
 
       // Process the ANSI output
       this.uiRenderer.processAnsi(text);

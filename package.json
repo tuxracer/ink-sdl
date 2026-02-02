@@ -40,7 +40,8 @@
     "node": ">=24.0.0"
   },
   "dependencies": {
-    "koffi": "^2.9.3"
+    "koffi": "^2.9.3",
+    "remeda": "^2.33.4"
   },
   "peerDependencies": {
     "ink": "^5.0.0 || ^6.0.0",

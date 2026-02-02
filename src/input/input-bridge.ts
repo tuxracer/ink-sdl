@@ -4,6 +4,7 @@
  * Maps SDL keyboard events to terminal escape sequences for Ink compatibility.
  */
 
+import { isNonNullish } from "remeda";
 import {
   SDLK_RETURN,
   SDLK_ESCAPE,
@@ -108,14 +109,14 @@ export class InputBridge {
 
     // Handle special keys
     const specialSequence = this.getSpecialKeySequence(keycode);
-    if (specialSequence !== null) {
+    if (isNonNullish(specialSequence)) {
       return specialSequence;
     }
 
     // Handle Ctrl+key combinations
     if (this.modifiers.ctrl) {
       const ctrlSequence = this.getCtrlSequence(keycode);
-      if (ctrlSequence !== null) {
+      if (isNonNullish(ctrlSequence)) {
         return ctrlSequence;
       }
     }
@@ -268,7 +269,7 @@ export class InputBridge {
    */
   toInkKeyEvent(event: SdlKeyEvent): InkKeyEvent | null {
     const sequence = this.processKeyEvent(event);
-    if (sequence === null) {
+    if (!isNonNullish(sequence)) {
       return null;
     }
 
