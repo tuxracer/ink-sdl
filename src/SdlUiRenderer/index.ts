@@ -62,6 +62,25 @@ const DEFAULT_FG: Color = { r: 255, g: 255, b: 255 };
 /** Minimum brightness for text visibility */
 const MIN_BRIGHTNESS = 100;
 
+/**
+ * Adjust color brightness by a multiplier, optionally clamping to max channel value
+ */
+const adjustBrightness = (
+  color: Color,
+  multiplier: number,
+  clamp = true
+): Color => ({
+  r: clamp
+    ? Math.min(COLOR_CHANNEL_MAX, Math.floor(color.r * multiplier))
+    : Math.floor(color.r * multiplier),
+  g: clamp
+    ? Math.min(COLOR_CHANNEL_MAX, Math.floor(color.g * multiplier))
+    : Math.floor(color.g * multiplier),
+  b: clamp
+    ? Math.min(COLOR_CHANNEL_MAX, Math.floor(color.b * multiplier))
+    : Math.floor(color.b * multiplier),
+});
+
 /** Length of a 6-character hex color string (RRGGBB) */
 const HEX_COLOR_LENGTH = 6;
 
@@ -516,29 +535,12 @@ export class SdlUiRenderer {
 
     // Apply bold (brighten colors)
     if (this.bold) {
-      fg = {
-        r: Math.min(
-          COLOR_CHANNEL_MAX,
-          Math.floor(fg.r * BOLD_BRIGHTNESS_MULTIPLIER)
-        ),
-        g: Math.min(
-          COLOR_CHANNEL_MAX,
-          Math.floor(fg.g * BOLD_BRIGHTNESS_MULTIPLIER)
-        ),
-        b: Math.min(
-          COLOR_CHANNEL_MAX,
-          Math.floor(fg.b * BOLD_BRIGHTNESS_MULTIPLIER)
-        ),
-      };
+      fg = adjustBrightness(fg, BOLD_BRIGHTNESS_MULTIPLIER);
     }
 
     // Apply dim (darken colors)
     if (this.dim) {
-      fg = {
-        r: Math.floor(fg.r * DIM_BRIGHTNESS_MULTIPLIER),
-        g: Math.floor(fg.g * DIM_BRIGHTNESS_MULTIPLIER),
-        b: Math.floor(fg.b * DIM_BRIGHTNESS_MULTIPLIER),
-      };
+      fg = adjustBrightness(fg, DIM_BRIGHTNESS_MULTIPLIER, false);
     }
 
     // Ensure minimum brightness for visibility
@@ -548,12 +550,7 @@ export class SdlUiRenderer {
       if (brightness === 0) {
         fg = { r: MIN_BRIGHTNESS, g: MIN_BRIGHTNESS, b: MIN_BRIGHTNESS };
       } else {
-        const scale = MIN_BRIGHTNESS / brightness;
-        fg = {
-          r: Math.min(COLOR_CHANNEL_MAX, Math.floor(fg.r * scale)),
-          g: Math.min(COLOR_CHANNEL_MAX, Math.floor(fg.g * scale)),
-          b: Math.min(COLOR_CHANNEL_MAX, Math.floor(fg.b * scale)),
-        };
+        fg = adjustBrightness(fg, MIN_BRIGHTNESS / brightness);
       }
     }
 
