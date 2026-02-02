@@ -26,6 +26,14 @@
  * ```
  */
 
+// Enable ANSI color output for chalk/Ink.
+// This must be set before chalk is imported (via Ink) for colors to work.
+// If ink-sdl is imported before ink, this will enable colors automatically.
+// Otherwise, users should set FORCE_COLOR=3 in their environment.
+if (process.env["FORCE_COLOR"] === undefined) {
+  process.env["FORCE_COLOR"] = "3";
+}
+
 // Main API
 export {
   createSdlStreams,

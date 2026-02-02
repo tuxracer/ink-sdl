@@ -18,9 +18,10 @@
  */
 
 import { parseArgs } from "node:util";
+// Import ink-sdl before ink to enable ANSI color output automatically
+import { createSdlStreams } from "../src";
 import React, { useState, useEffect } from "react";
 import { render, Text, Box, useInput, Spacer, Newline } from "ink";
-import { createSdlStreams } from "../src";
 
 const { values: args } = parseArgs({
   options: {

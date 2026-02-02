@@ -225,6 +225,14 @@ export interface SdlStreams {
 export const createSdlStreams = (
   options: SdlStreamsOptions = {}
 ): SdlStreams => {
+  // Enable ANSI color output for chalk/Ink
+  // chalk checks process.env.FORCE_COLOR rather than the stream's isTTY property,
+  // so we need to set this for colors to work with our custom stdout stream.
+  // Level 3 enables 24-bit true color support.
+  if (process.env["FORCE_COLOR"] === undefined) {
+    process.env["FORCE_COLOR"] = "3";
+  }
+
   // Create the UI renderer - filter out undefined options
   const rendererOptions = pickBy(options, isDefined) as SdlUiRendererOptions;
 
