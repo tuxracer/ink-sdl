@@ -17,8 +17,8 @@ Each module is a directory named after its primary export, containing `index.ts`
 - `src/InputBridge/` - SDL keycodes → terminal sequences
 - `src/Sdl2/` - FFI bindings to SDL2 via koffi
 - `src/SdlTtf/` - FFI bindings to SDL2_ttf via koffi
-- `src/fonts/` - Bundled Cozette font
 - `src/consts.ts` - Shared constants used across modules
+- `fonts/` - Bundled Cozette font
 - `examples/` - Example applications
 
 ## Commands

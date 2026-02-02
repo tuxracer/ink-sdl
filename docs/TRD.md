@@ -482,10 +482,10 @@ ink-sdl/
 │   │   ├── index.ts            # FFI bindings to SDL2 via koffi
 │   │   ├── consts.ts
 │   │   └── types.ts
-│   ├── SdlTtf/
-│   │   └── index.ts            # FFI bindings to SDL2_ttf via koffi
-│   └── fonts/
-│       └── CozetteVector.ttf   # Bundled font
+│   └── SdlTtf/
+│       └── index.ts            # FFI bindings to SDL2_ttf via koffi
+├── fonts/
+│   └── CozetteVector.ttf       # Bundled font
 ├── examples/
 │   └── ...                     # Example applications
 ├── docs/

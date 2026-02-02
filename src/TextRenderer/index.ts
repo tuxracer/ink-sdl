@@ -83,12 +83,12 @@ export class TextRenderer {
     const currentDirname = dirname(currentFilename);
 
     // Try multiple locations:
-    // 1. Development: src/fonts/ relative to this file
+    // 1. Development: fonts/ at project root relative to this file
     // 2. Bundled: fonts/ relative to dist
     const paths = [
-      resolve(currentDirname, "../fonts/CozetteVector.ttf"), // Dev path
+      resolve(currentDirname, "../../fonts/CozetteVector.ttf"), // Dev path
       resolve(currentDirname, "./fonts/CozetteVector.ttf"), // Bundled (dist)
-      resolve(currentDirname, "../../src/fonts/CozetteVector.ttf"), // Alternate
+      resolve(currentDirname, "../fonts/CozetteVector.ttf"), // Alternate
     ];
 
     for (const p of paths) {
