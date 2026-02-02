@@ -45,6 +45,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
 ## Coding Standards
 
 - **Package manager**: Use `pnpm` for all package management (install, add, remove, etc.)
+- **ESM imports only**: Always use `import` syntax, never `require()`. This is an ESM project and `require` will throw `ReferenceError: require is not defined`
 - **Arrow functions**: Use `const foo = () => { ... }` (enforced by ESLint, auto-fixable)
 - **Named imports**: Use `import { pipe, filter } from 'remeda'` not `import * as R` (tree-shaking)
 - **Remeda utilities**: Prefer for array/object manipulation over manual loops
