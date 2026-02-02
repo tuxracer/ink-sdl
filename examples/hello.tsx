@@ -57,6 +57,15 @@ const TextStylesTab = () => (
         Combined: bold + italic + underline
       </Text>
     </Box>
+
+    <Text bold>Emoji</Text>
+    <Box flexDirection="column" paddingLeft={1}>
+      <Text>Smileys: 😀 😎 🥳 😍 🤔 😴</Text>
+      <Text>Hands: 👋 👍 👎 👏 🙌 ✌️</Text>
+      <Text>Animals: 🐱 🐶 🦊 🐻 🐼 🦁</Text>
+      <Text>Food: 🍎 🍕 🍔 🌮 🍣 🍩</Text>
+      <Text>Objects: ⭐ 🔥 💡 🎉 🚀 💻</Text>
+    </Box>
   </Box>
 );
 
