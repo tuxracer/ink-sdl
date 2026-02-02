@@ -22,6 +22,8 @@ import {
   SDL_WINDOWEVENT_FOCUS_LOST,
   SDL_KEYDOWN,
   SDL_KEYUP,
+  SDL_TEXTUREACCESS_TARGET,
+  SDL_PIXELFORMAT_ARGB8888,
   createSDLRect,
 } from "../Sdl2";
 import type { SDLPointer, SdlKeyEvent } from "../Sdl2";
@@ -83,6 +85,7 @@ export class SdlUiRenderer {
   private window: SDLPointer | null = null;
   private renderer: SDLPointer | null = null;
   private textRenderer: TextRenderer | null = null;
+  private renderTarget: SDLPointer | null = null;
 
   private ansiParser: AnsiParser;
   private inputBridge: InputBridge;
@@ -171,6 +174,11 @@ export class SdlUiRenderer {
     // Calculate terminal dimensions
     this.updateTerminalDimensions();
 
+    // Create render target texture for persistent drawing
+    // This solves the double-buffering issue where SDL swaps buffers on present,
+    // causing incremental updates from Ink to be lost
+    this.createRenderTarget();
+
     // Set background color
     this.sdl.setRenderDrawColor(
       this.renderer,
@@ -180,7 +188,12 @@ export class SdlUiRenderer {
       COLOR_CHANNEL_MAX
     );
 
-    // Initial clear
+    // Initial clear of the render target
+    this.sdl.setRenderTarget(this.renderer, this.renderTarget);
+    this.sdl.renderClear(this.renderer);
+    this.sdl.setRenderTarget(this.renderer, null);
+
+    // Present initial black frame
     this.sdl.renderClear(this.renderer);
     this.sdl.renderPresent(this.renderer);
 
@@ -219,6 +232,33 @@ export class SdlUiRenderer {
   }
 
   /**
+   * Create or recreate the render target texture
+   */
+  private createRenderTarget(): void {
+    if (!this.renderer) {
+      return;
+    }
+
+    // Destroy old render target if it exists
+    if (this.renderTarget) {
+      this.sdl.destroyTexture(this.renderTarget);
+      this.renderTarget = null;
+    }
+
+    // Get the drawable size for the texture dimensions
+    const drawable = this.sdl.getDrawableSize(this.window!);
+
+    // Create a new render target texture
+    this.renderTarget = this.sdl.createTexture(
+      this.renderer,
+      SDL_PIXELFORMAT_ARGB8888,
+      SDL_TEXTUREACCESS_TARGET,
+      drawable.width,
+      drawable.height
+    );
+  }
+
+  /**
    * Process ANSI output from Ink
    */
   processAnsi(output: string): void {
@@ -230,15 +270,24 @@ export class SdlUiRenderer {
    * Render pending commands and present
    */
   present(): void {
-    if (!this.renderer || !this.textRenderer) {
+    if (!this.renderer || !this.textRenderer || !this.renderTarget) {
       return;
     }
 
-    // Process all pending commands
+    // Set render target to our persistent texture
+    this.sdl.setRenderTarget(this.renderer, this.renderTarget);
+
+    // Process all pending commands (drawing to the texture)
     for (const cmd of this.pendingCommands) {
       this.executeCommand(cmd);
     }
     this.pendingCommands = [];
+
+    // Reset render target to the screen
+    this.sdl.setRenderTarget(this.renderer, null);
+
+    // Copy the render target texture to the screen
+    this.sdl.renderCopy(this.renderer, this.renderTarget, null, null);
 
     // Present the frame
     this.sdl.renderPresent(this.renderer);
@@ -385,10 +434,12 @@ export class SdlUiRenderer {
    * Clear the entire screen
    */
   clear(): void {
-    if (!this.renderer) {
+    if (!this.renderer || !this.renderTarget) {
       return;
     }
 
+    // Clear the render target texture
+    this.sdl.setRenderTarget(this.renderer, this.renderTarget);
     this.sdl.setRenderDrawColor(
       this.renderer,
       DEFAULT_BG.r,
@@ -397,6 +448,7 @@ export class SdlUiRenderer {
       COLOR_CHANNEL_MAX
     );
     this.sdl.renderClear(this.renderer);
+    this.sdl.setRenderTarget(this.renderer, null);
 
     // Reset parser state
     this.ansiParser.reset();
@@ -498,6 +550,9 @@ export class SdlUiRenderer {
       }
     }
 
+    // Recreate render target at new size
+    this.createRenderTarget();
+
     // Recalculate terminal dimensions
     this.updateTerminalDimensions();
 
@@ -566,6 +621,9 @@ export class SdlUiRenderer {
       this.charHeight = charDims.height;
     }
 
+    // Recreate render target in case drawable size changed
+    this.createRenderTarget();
+
     this.updateTerminalDimensions();
     this.clear();
   }
@@ -584,6 +642,11 @@ export class SdlUiRenderer {
     if (this.textRenderer) {
       this.textRenderer.destroy();
       this.textRenderer = null;
+    }
+
+    if (this.renderTarget) {
+      this.sdl.destroyTexture(this.renderTarget);
+      this.renderTarget = null;
     }
 
     if (this.renderer) {

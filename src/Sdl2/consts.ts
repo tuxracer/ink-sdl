@@ -51,6 +51,9 @@ export const SDL_RENDERER_SOFTWARE = 0x00000001;
 /** Texture can be locked for direct pixel access */
 export const SDL_TEXTUREACCESS_STREAMING = 1;
 
+/** Texture can be used as a render target */
+export const SDL_TEXTUREACCESS_TARGET = 2;
+
 // =============================================================================
 // SDL Blend Modes
 // =============================================================================
