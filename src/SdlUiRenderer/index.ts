@@ -61,6 +61,14 @@ export interface SdlUiRendererOptions {
   scaleFactor?: number | null;
 }
 
+/** Result from processing SDL events */
+export interface ProcessEventsResult {
+  /** Key events that occurred */
+  keyEvents: SdlKeyEvent[];
+  /** Whether a resize event occurred */
+  resized: boolean;
+}
+
 /**
  * SDL UI Renderer
  *
@@ -418,8 +426,9 @@ export class SdlUiRenderer {
   /**
    * Process SDL events
    */
-  processEvents(): SdlKeyEvent[] {
+  processEvents(): ProcessEventsResult {
     const keyEvents: SdlKeyEvent[] = [];
+    let resized = false;
 
     let event = this.sdl.pollEvent();
     while (event) {
@@ -430,6 +439,7 @@ export class SdlUiRenderer {
           this.shouldQuit = true;
         } else if (event.windowEvent === SDL_WINDOWEVENT_SIZE_CHANGED) {
           this.handleResize();
+          resized = true;
         }
       } else if (event.type === SDL_KEYDOWN || event.type === SDL_KEYUP) {
         if (event.keycode !== undefined && event.pressed !== undefined) {
@@ -444,7 +454,7 @@ export class SdlUiRenderer {
       event = this.sdl.pollEvent();
     }
 
-    return keyEvents;
+    return { keyEvents, resized };
   }
 
   /**

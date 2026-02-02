@@ -64,7 +64,13 @@ export class SdlWindow extends EventEmitter {
       }
 
       // Process SDL events
-      const keyEvents = this.renderer.processEvents();
+      const { keyEvents, resized } = this.renderer.processEvents();
+
+      // Notify Ink of resize so it can re-render with new dimensions
+      if (resized) {
+        this.outputStream.notifyResize();
+        this.emit("resize", this.renderer.getDimensions());
+      }
 
       // Convert key events to terminal sequences
       for (const event of keyEvents) {
