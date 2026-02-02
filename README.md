@@ -55,6 +55,8 @@ pnpm install
 pnpm exec tsx examples/hello.tsx
 ```
 
+> **Note:** This project uses [pnpm](https://pnpm.io/) for development. You can install and use ink-sdl in your own project with npm or pnpm, but if you're contributing to the library itself, use pnpm.
+
 ## Usage
 
 ```tsx
