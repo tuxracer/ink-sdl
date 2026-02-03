@@ -71,11 +71,9 @@ export class SdlTtf {
     try {
       this.lib = koffi.load(libPath);
       this.bindFunctions();
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      throw new Error(
-        `Failed to load SDL2_ttf library from ${libPath}: ${message}`
-      );
+    } catch {
+      // Library path was found but loading failed - likely not installed
+      throw new SdlDependencyError("SDL2_ttf");
     }
   }
 

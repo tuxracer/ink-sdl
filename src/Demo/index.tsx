@@ -378,7 +378,9 @@ export const DemoApp = ({
   }, []);
 
   useEffect(() => {
-    if (!onFrameRateChange) {return;}
+    if (!onFrameRateChange) {
+      return;
+    }
     return onFrameRateChange(setFrameRate);
   }, [onFrameRateChange]);
 
