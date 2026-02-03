@@ -80,3 +80,9 @@ export {
   type SdlKeyEvent,
 } from "./Sdl2";
 export { getSdlTtf, SdlTtf } from "./SdlTtf";
+
+// Error handling
+export {
+  SdlDependencyError,
+  isSdlDependencyError,
+} from "./utils/SdlDependencyError";

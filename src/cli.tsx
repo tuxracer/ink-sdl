@@ -12,6 +12,7 @@ import { parseArgs } from "node:util";
 import { createSdlStreams } from ".";
 import { render } from "ink";
 import { DemoApp } from "./Demo";
+import { isSdlDependencyError } from "./utils/SdlDependencyError";
 
 // ============================================================================
 // Constants
@@ -107,20 +108,33 @@ const sdlOptions = {
   ...(args["min-height"] && { minHeight: parseInt(args["min-height"], 10) }),
 };
 
-const { stdin, stdout, window, renderer } = createSdlStreams(sdlOptions);
+// ============================================================================
+// Initialize SDL and Render
+// ============================================================================
 
-const scaleFactor = renderer.getScaleFactor();
-const cacheStats = window.getCacheStats();
+try {
+  const { stdin, stdout, window, renderer } = createSdlStreams(sdlOptions);
 
-// Type assertions needed because ink's types expect tty.ReadStream/WriteStream
-// but our SDL streams are compatible at runtime
-render(<DemoApp scaleFactor={scaleFactor} cacheStats={cacheStats} />, {
-  stdin: stdin as unknown as NodeJS.ReadStream,
-  stdout: stdout as unknown as NodeJS.WriteStream,
-});
+  const scaleFactor = renderer.getScaleFactor();
+  const cacheStats = window.getCacheStats();
 
-window.on("close", () => process.exit(0));
-process.on("SIGINT", () => {
-  window.close();
-  process.exit(0);
-});
+  // Type assertions needed because ink's types expect tty.ReadStream/WriteStream
+  // but our SDL streams are compatible at runtime
+  render(<DemoApp scaleFactor={scaleFactor} cacheStats={cacheStats} />, {
+    stdin: stdin as unknown as NodeJS.ReadStream,
+    stdout: stdout as unknown as NodeJS.WriteStream,
+  });
+
+  window.on("close", () => process.exit(0));
+  process.on("SIGINT", () => {
+    window.close();
+    process.exit(0);
+  });
+} catch (error) {
+  if (isSdlDependencyError(error)) {
+    console.error(error.getFormattedMessage());
+    process.exit(1);
+  }
+  // Re-throw other errors
+  throw error;
+}

@@ -8,6 +8,7 @@
 import koffi from "koffi";
 import type { SDLPointer } from "./types";
 import { findLibrary } from "../utils/findLibrary";
+import { SdlDependencyError } from "../utils/SdlDependencyError";
 import {
   INT32_BYTES,
   SDL_EVENT_SIZE,
@@ -181,12 +182,7 @@ export class Sdl2 {
   constructor() {
     const libPath = findSDLLibrary();
     if (!libPath) {
-      throw new Error(
-        "SDL2 library not found. Please install SDL2:\n" +
-          "  macOS: brew install sdl2\n" +
-          "  Linux: apt install libsdl2-2.0-0 (or equivalent)\n" +
-          "  Windows: Download SDL2.dll from libsdl.org"
-      );
+      throw new SdlDependencyError("SDL2");
     }
 
     try {

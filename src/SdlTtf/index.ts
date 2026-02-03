@@ -8,6 +8,7 @@
 import koffi from "koffi";
 import { getSdl2, type SDLPointer, INT32_BYTES } from "../Sdl2";
 import { findLibrary } from "../utils/findLibrary";
+import { SdlDependencyError } from "../utils/SdlDependencyError";
 
 // SDL2_ttf library paths by platform
 const SDL_TTF_LIB_PATHS: Record<string, string[]> = {
@@ -64,12 +65,7 @@ export class SdlTtf {
   constructor() {
     const libPath = findSDLTtfLibrary();
     if (!libPath) {
-      throw new Error(
-        "SDL2_ttf library not found. Please install SDL2_ttf:\n" +
-          "  macOS: brew install sdl2_ttf\n" +
-          "  Linux: apt install libsdl2-ttf-2.0-0 (or equivalent)\n" +
-          "  Windows: Download SDL2_ttf.dll from libsdl.org"
-      );
+      throw new SdlDependencyError("SDL2_ttf");
     }
 
     try {
