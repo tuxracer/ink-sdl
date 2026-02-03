@@ -28,6 +28,7 @@ import {
   SDL_TEXTUREACCESS_TARGET,
   SDL_PIXELFORMAT_ARGB8888,
   SDL_BLENDMODE_BLEND,
+  DEFAULT_REFRESH_RATE,
   createSDLRect,
 } from "../Sdl2";
 import type { SDLPointer, SdlKeyEvent } from "../Sdl2";
@@ -940,5 +941,19 @@ export class SdlUiRenderer {
    */
   getCacheStats(): { size: number; maxSize: number } | null {
     return this.textRenderer?.getCacheStats() ?? null;
+  }
+
+  /**
+   * Get the refresh rate of the display containing the window
+   *
+   * Queries the display's current refresh rate for matching event loop timing.
+   * Works with any refresh rate including variable refresh rate (VRR) displays.
+   * Returns DEFAULT_REFRESH_RATE (60) if detection fails.
+   */
+  getDisplayRefreshRate(): number {
+    if (!this.window) {
+      return DEFAULT_REFRESH_RATE;
+    }
+    return this.sdl.getDisplayRefreshRate(this.window);
   }
 }

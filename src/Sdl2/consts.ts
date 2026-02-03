@@ -239,3 +239,27 @@ export const ASCII_A_LOWER = 97;
 
 /** ASCII code for lowercase 'z' */
 export const ASCII_Z_LOWER = 122;
+
+// =============================================================================
+// SDL Display Mode
+// =============================================================================
+
+/**
+ * Size of SDL_DisplayMode struct in bytes
+ *
+ * Structure layout:
+ * - Uint32 format (4 bytes)
+ * - int w (4 bytes)
+ * - int h (4 bytes)
+ * - int refresh_rate (4 bytes)
+ * - void* driverdata (8 bytes on 64-bit, 4 on 32-bit)
+ *
+ * Using 32 bytes for safety (includes padding/alignment)
+ */
+export const SDL_DISPLAYMODE_SIZE = 32;
+
+/** Byte offset of refresh_rate field in SDL_DisplayMode */
+export const SDL_DISPLAYMODE_REFRESH_RATE_OFFSET = 12;
+
+/** Default refresh rate to use when detection fails */
+export const DEFAULT_REFRESH_RATE = 60;

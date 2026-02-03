@@ -120,6 +120,7 @@ npx ink-sdl --font-name Menlo
 | `--borderless`   | Remove window decorations                                   |
 | `--min-width`    | Minimum window width in pixels                              |
 | `--min-height`   | Minimum window height in pixels                             |
+| `--frame-rate`   | Force frame rate instead of auto-detecting display refresh  |
 
 > **Note:** This project uses [pnpm](https://pnpm.io/) for development. You can install and use ink-sdl in your own project with npm or pnpm, but if you're contributing to the library itself, use pnpm.
 
@@ -196,6 +197,7 @@ Creates stdin/stdout streams and a window for use with Ink.
 | `borderless`      | `boolean`                            | `false`     | Remove window decorations (title bar, borders)             |
 | `minWidth`        | `number`                             | `undefined` | Minimum window width in pixels                             |
 | `minHeight`       | `number`                             | `undefined` | Minimum window height in pixels                            |
+| `frameRate`       | `number`                             | `undefined` | Force frame rate instead of auto-detecting display refresh |
 | `existing`        | `ExistingSdlResources`               | `undefined` | Use existing SDL window/renderer (see Advanced Usage)      |
 
 #### Returns
@@ -217,10 +219,12 @@ Event emitter for window events.
 
 - `close` - Emitted when the window is closed
 - `key` - Emitted on keyboard events
+- `frameRateChange` - Emitted when display refresh rate changes (with new rate as argument)
 
 #### Methods
 
 - `getDimensions()` - Returns `{ columns, rows }` for terminal size
+- `getFrameRate()` - Returns the current frame rate (forced or auto-detected)
 - `setTitle(title)` - Set the window title
 - `clear()` - Clear the screen
 - `close()` - Close the window

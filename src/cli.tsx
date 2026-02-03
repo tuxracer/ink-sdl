@@ -43,6 +43,7 @@ const { values: args } = parseArgs({
     borderless: { type: "boolean", default: false },
     "min-width": { type: "string" },
     "min-height": { type: "string" },
+    "frame-rate": { type: "string" },
     help: { type: "boolean", short: "h", default: false },
   },
 });
@@ -67,6 +68,7 @@ Options:
   --borderless            Remove window decorations
   --min-width <number>    Minimum window width in pixels
   --min-height <number>   Minimum window height in pixels
+  --frame-rate <number>   Force frame rate instead of auto-detect
   -h, --help              Show this help message
 
 For library usage, see: https://github.com/tuxracer/ink-sdl
@@ -106,6 +108,7 @@ const sdlOptions = {
   ...(args.fullscreen && { fullscreen: parseFullscreen(args.fullscreen) }),
   ...(args["min-width"] && { minWidth: parseInt(args["min-width"], 10) }),
   ...(args["min-height"] && { minHeight: parseInt(args["min-height"], 10) }),
+  ...(args["frame-rate"] && { frameRate: parseInt(args["frame-rate"], 10) }),
 };
 
 // ============================================================================
@@ -116,14 +119,31 @@ try {
   const { stdin, stdout, window, renderer } = createSdlStreams(sdlOptions);
 
   const scaleFactor = renderer.getScaleFactor();
+  const initialFrameRate = window.getFrameRate();
   const cacheStats = window.getCacheStats();
+
+  // Subscribe to frame rate changes and return unsubscribe function
+  const onFrameRateChange = (callback: (frameRate: number) => void) => {
+    window.on("frameRateChange", callback);
+    return () => {
+      window.off("frameRateChange", callback);
+    };
+  };
 
   // Type assertions needed because ink's types expect tty.ReadStream/WriteStream
   // but our SDL streams are compatible at runtime
-  render(<DemoApp scaleFactor={scaleFactor} cacheStats={cacheStats} />, {
-    stdin: stdin as unknown as NodeJS.ReadStream,
-    stdout: stdout as unknown as NodeJS.WriteStream,
-  });
+  render(
+    <DemoApp
+      scaleFactor={scaleFactor}
+      initialFrameRate={initialFrameRate}
+      onFrameRateChange={onFrameRateChange}
+      cacheStats={cacheStats}
+    />,
+    {
+      stdin: stdin as unknown as NodeJS.ReadStream,
+      stdout: stdout as unknown as NodeJS.WriteStream,
+    }
+  );
 
   window.on("close", () => process.exit(0));
   process.on("SIGINT", () => {

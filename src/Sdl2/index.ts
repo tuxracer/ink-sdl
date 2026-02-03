@@ -21,6 +21,9 @@ import {
   SDL_RECT_Y_OFFSET,
   SDL_RECT_W_OFFSET,
   SDL_RECT_H_OFFSET,
+  SDL_DISPLAYMODE_SIZE,
+  SDL_DISPLAYMODE_REFRESH_RATE_OFFSET,
+  DEFAULT_REFRESH_RATE,
   SDL_WINDOWEVENT,
   SDL_KEYDOWN,
   SDL_KEYUP,
@@ -179,6 +182,13 @@ export class Sdl2 {
   // Event functions
   private _SDL_PollEvent!: (event: Buffer) => number;
 
+  // Display mode functions
+  private _SDL_GetWindowDisplayIndex!: (window: SDLPointer) => number;
+  private _SDL_GetCurrentDisplayMode!: (
+    displayIndex: number,
+    mode: Buffer
+  ) => number;
+
   constructor() {
     const libPath = findSDLLibrary();
     if (!libPath) {
@@ -286,6 +296,14 @@ export class Sdl2 {
 
     // Events
     this._SDL_PollEvent = this.lib.func("int SDL_PollEvent(void* event)");
+
+    // Display mode
+    this._SDL_GetWindowDisplayIndex = this.lib.func(
+      "int SDL_GetWindowDisplayIndex(void* window)"
+    );
+    this._SDL_GetCurrentDisplayMode = this.lib.func(
+      "int SDL_GetCurrentDisplayMode(int displayIndex, void* mode)"
+    );
   }
 
   /**
@@ -605,6 +623,40 @@ export class Sdl2 {
       return 1.0;
     }
     return physical.width / logical.width;
+  }
+
+  /**
+   * Get the refresh rate of the display containing the window
+   *
+   * Returns the display's current refresh rate, or DEFAULT_REFRESH_RATE (60)
+   * if detection fails. Works with any refresh rate including variable
+   * refresh rate (VRR) displays.
+   */
+  getDisplayRefreshRate(window: SDLPointer): number {
+    // Get which display the window is on
+    const displayIndex = this._SDL_GetWindowDisplayIndex(window);
+    if (displayIndex < 0) {
+      return DEFAULT_REFRESH_RATE;
+    }
+
+    // Get the current display mode
+    const modeBuf = Buffer.alloc(SDL_DISPLAYMODE_SIZE);
+    const result = this._SDL_GetCurrentDisplayMode(displayIndex, modeBuf);
+    if (result !== 0) {
+      return DEFAULT_REFRESH_RATE;
+    }
+
+    // Read refresh_rate from the structure
+    const refreshRate = modeBuf.readInt32LE(
+      SDL_DISPLAYMODE_REFRESH_RATE_OFFSET
+    );
+
+    // SDL returns 0 if refresh rate is unspecified
+    if (refreshRate <= 0) {
+      return DEFAULT_REFRESH_RATE;
+    }
+
+    return refreshRate;
   }
 
   /**

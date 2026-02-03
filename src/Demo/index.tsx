@@ -344,6 +344,10 @@ const MENU_ITEMS = [
 export interface DemoAppProps {
   /** Current scale factor for display */
   scaleFactor: number;
+  /** Initial frame rate */
+  initialFrameRate: number;
+  /** Callback to subscribe to frame rate changes */
+  onFrameRateChange?: (callback: (frameRate: number) => void) => () => void;
   /** Glyph cache statistics (optional) */
   cacheStats?: { size: number; maxSize: number } | null;
 }
@@ -354,10 +358,16 @@ export interface DemoAppProps {
  * A comprehensive demo showcasing ink-sdl capabilities including
  * text styles, colors, layouts, and dynamic updates.
  */
-export const DemoApp = ({ scaleFactor, cacheStats }: DemoAppProps) => {
+export const DemoApp = ({
+  scaleFactor,
+  initialFrameRate,
+  onFrameRateChange,
+  cacheStats,
+}: DemoAppProps) => {
   const [selectedTab, setSelectedTab] = useState(0);
   const [elapsed, setElapsed] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [frameRate, setFrameRate] = useState(initialFrameRate);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -366,6 +376,11 @@ export const DemoApp = ({ scaleFactor, cacheStats }: DemoAppProps) => {
     }, TIMER_INTERVAL_MS);
     return () => clearInterval(timer);
   }, []);
+
+  useEffect(() => {
+    if (!onFrameRateChange) {return;}
+    return onFrameRateChange(setFrameRate);
+  }, [onFrameRateChange]);
 
   useInput((input, key) => {
     if (key.leftArrow || input === "h") {
@@ -386,7 +401,7 @@ export const DemoApp = ({ scaleFactor, cacheStats }: DemoAppProps) => {
         </Text>
         <Spacer />
         <Text dimColor>
-          Scale: {scaleFactor.toFixed(SCALE_DECIMAL_PLACES)}x
+          Scale: {scaleFactor.toFixed(SCALE_DECIMAL_PLACES)}x | {frameRate} fps
           {cacheStats
             ? ` | Cache: ${cacheStats.size}/${cacheStats.maxSize}`
             : ""}

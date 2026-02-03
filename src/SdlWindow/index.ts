@@ -14,7 +14,11 @@ import {
 import { SdlOutputStream } from "../SdlOutputStream";
 import { SdlInputStream } from "../SdlInputStream";
 import { getSdl2 } from "../Sdl2";
-import { EVENT_LOOP_INTERVAL_MS } from "./consts";
+import {
+  MS_PER_SECOND,
+  DEFAULT_EVENT_LOOP_INTERVAL_MS,
+  REFRESH_RATE_CHECK_INTERVAL_MS,
+} from "./consts";
 
 /**
  * Options for creating SDL streams
@@ -48,6 +52,8 @@ export interface SdlStreamsOptions {
   minWidth?: number | undefined;
   /** Minimum window height in pixels */
   minHeight?: number | undefined;
+  /** Force a specific frame rate instead of auto-detecting display refresh rate */
+  frameRate?: number | undefined;
   /**
    * Use existing SDL window and renderer instead of creating new ones.
    *
@@ -90,76 +96,155 @@ export class SdlWindow extends EventEmitter {
   private inputStream: SdlInputStream;
   private outputStream: SdlOutputStream;
   private closed = false;
+  private currentRefreshRate = 0;
+  private lastRefreshRateCheck = 0;
+  private forcedFrameRate: number | null = null;
 
   constructor(
     renderer: SdlUiRenderer,
     inputStream: SdlInputStream,
-    outputStream: SdlOutputStream
+    outputStream: SdlOutputStream,
+    frameRate?: number
   ) {
     super();
     this.renderer = renderer;
     this.inputStream = inputStream;
     this.outputStream = outputStream;
+    this.forcedFrameRate = frameRate ?? null;
 
     // Start the event loop
     this.startEventLoop();
   }
 
   /**
+   * Calculate event loop interval from refresh rate
+   */
+  private calculateIntervalMs(refreshRate: number): number {
+    return refreshRate > 0
+      ? Math.floor(MS_PER_SECOND / refreshRate)
+      : DEFAULT_EVENT_LOOP_INTERVAL_MS;
+  }
+
+  /**
+   * Get the effective frame rate (forced or auto-detected)
+   */
+  private getEffectiveFrameRate(): number {
+    if (this.forcedFrameRate !== null) {
+      return this.forcedFrameRate;
+    }
+    return this.renderer.getDisplayRefreshRate();
+  }
+
+  /**
    * Start the SDL event loop
+   *
+   * The loop interval is calculated from either the forced frame rate or
+   * the display's current refresh rate. When auto-detecting, supports any
+   * rate including variable refresh rate (VRR) displays, and automatically
+   * adapts when the refresh rate changes (e.g., laptop switching to battery).
    */
   private startEventLoop(): void {
+    this.currentRefreshRate = this.getEffectiveFrameRate();
+    this.lastRefreshRateCheck = Date.now();
+    const intervalMs = this.calculateIntervalMs(this.currentRefreshRate);
+
     this.eventLoopHandle = setInterval(() => {
-      if (this.closed) {
-        return;
+      this.runEventLoopIteration();
+    }, intervalMs);
+  }
+
+  /**
+   * Check if refresh rate changed and restart event loop if needed
+   *
+   * Skipped when using a forced frame rate since it won't change.
+   */
+  private checkRefreshRateChange(): void {
+    // Skip check when using forced frame rate
+    if (this.forcedFrameRate !== null) {
+      return;
+    }
+
+    const now = Date.now();
+    if (now - this.lastRefreshRateCheck < REFRESH_RATE_CHECK_INTERVAL_MS) {
+      return;
+    }
+
+    this.lastRefreshRateCheck = now;
+    const newRefreshRate = this.renderer.getDisplayRefreshRate();
+
+    if (newRefreshRate !== this.currentRefreshRate) {
+      this.currentRefreshRate = newRefreshRate;
+
+      // Restart event loop with new interval
+      if (this.eventLoopHandle) {
+        clearInterval(this.eventLoopHandle);
       }
 
-      // Process SDL events
-      const { keyEvents, resized, focusLost } = this.renderer.processEvents();
+      const intervalMs = this.calculateIntervalMs(newRefreshRate);
+      this.eventLoopHandle = setInterval(() => {
+        this.runEventLoopIteration();
+      }, intervalMs);
 
-      // Notify Ink of resize so it can re-render with new dimensions
-      if (resized) {
-        this.outputStream.notifyResize();
-        this.emit("resize", this.renderer.getDimensions());
-      }
+      this.emit("frameRateChange", newRefreshRate);
+    }
+  }
 
-      // Reset modifier keys when focus is lost to prevent "stuck" keys
-      if (focusLost) {
-        this.renderer.resetInputState();
-        this.emit("blur");
-      }
+  /**
+   * Run a single iteration of the event loop
+   */
+  private runEventLoopIteration(): void {
+    if (this.closed) {
+      return;
+    }
 
-      // Convert key events to terminal sequences
-      for (const event of keyEvents) {
-        const sequence = this.renderer.keyEventToSequence(event);
-        if (sequence) {
-          // Ctrl+C handling: emit "sigint" for graceful shutdown opportunity
-          if (sequence === "\x03") {
-            if (this.listenerCount("sigint") > 0) {
-              // Application has a handler - let it manage shutdown gracefully
-              this.emit("sigint");
-            } else {
-              // No handler - send SIGINT like a real terminal
-              process.kill(process.pid, "SIGINT");
-            }
-            continue;
+    // Periodically check for refresh rate changes
+    this.checkRefreshRateChange();
+
+    // Process SDL events
+    const { keyEvents, resized, focusLost } = this.renderer.processEvents();
+
+    // Notify Ink of resize so it can re-render with new dimensions
+    if (resized) {
+      this.outputStream.notifyResize();
+      this.emit("resize", this.renderer.getDimensions());
+    }
+
+    // Reset modifier keys when focus is lost to prevent "stuck" keys
+    if (focusLost) {
+      this.renderer.resetInputState();
+      this.emit("blur");
+    }
+
+    // Convert key events to terminal sequences
+    for (const event of keyEvents) {
+      const sequence = this.renderer.keyEventToSequence(event);
+      if (sequence) {
+        // Ctrl+C handling: emit "sigint" for graceful shutdown opportunity
+        if (sequence === "\x03") {
+          if (this.listenerCount("sigint") > 0) {
+            // Application has a handler - let it manage shutdown gracefully
+            this.emit("sigint");
+          } else {
+            // No handler - send SIGINT like a real terminal
+            process.kill(process.pid, "SIGINT");
           }
-
-          this.inputStream.pushKey(sequence);
-          this.emit("key", event);
+          continue;
         }
-      }
 
-      // Refresh the display to prevent screen from going black
-      // SDL's double-buffering requires continuous presents to keep content visible
-      this.renderer.refreshDisplay();
-
-      // Check for window close
-      if (this.renderer.shouldClose()) {
-        this.emit("close");
-        this.close();
+        this.inputStream.pushKey(sequence);
+        this.emit("key", event);
       }
-    }, EVENT_LOOP_INTERVAL_MS);
+    }
+
+    // Refresh the display to prevent screen from going black
+    // SDL's double-buffering requires continuous presents to keep content visible
+    this.renderer.refreshDisplay();
+
+    // Check for window close
+    if (this.renderer.shouldClose()) {
+      this.emit("close");
+      this.close();
+    }
   }
 
   /**
@@ -236,6 +321,26 @@ export class SdlWindow extends EventEmitter {
   getCacheStats(): { size: number; maxSize: number } | null {
     return this.renderer.getCacheStats();
   }
+
+  /**
+   * Get the current frame rate
+   *
+   * Returns either the forced frame rate (if set) or the auto-detected
+   * display refresh rate. Subscribe to "frameRateChange" event to be
+   * notified when the rate changes.
+   *
+   * @example
+   * ```typescript
+   * console.log(`Running at ${window.getFrameRate()} fps`);
+   *
+   * window.on("frameRateChange", (frameRate) => {
+   *   console.log(`Frame rate changed to ${frameRate} fps`);
+   * });
+   * ```
+   */
+  getFrameRate(): number {
+    return this.currentRefreshRate;
+  }
 }
 
 /**
@@ -298,7 +403,12 @@ export const createSdlStreams = (
   const outputStream = new SdlOutputStream(renderer);
 
   // Create window wrapper
-  const window = new SdlWindow(renderer, inputStream, outputStream);
+  const window = new SdlWindow(
+    renderer,
+    inputStream,
+    outputStream,
+    options.frameRate
+  );
 
   return {
     stdin: inputStream,
