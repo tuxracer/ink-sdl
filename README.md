@@ -2,6 +2,31 @@
 
 Render [Ink](https://github.com/vadimdemedes/ink) TUI applications to an SDL window instead of the terminal.
 
+## Why ink-sdl?
+
+For plain text TUIs, a GPU-accelerated terminal like [Ghostty](https://ghostty.org/) or [Kitty](https://sw.kovidgoyal.net/kitty/) works great. So why render to SDL instead?
+
+**The problem appears when you need high-framerate graphics alongside your Ink UI**—like an emulator, game, or video player with a React-based menu system.
+
+Even GPU-accelerated terminals struggle when using image protocols (like the [Kitty graphics protocol](https://sw.kovidgoyal.net/kitty/graphics-protocol/)) because they require:
+
+```
+Raw pixels → base64 encode (+33% size) → escape sequences →
+PTY syscalls → terminal parses sequences → base64 decode → GPU upload → render
+```
+
+At 60fps for an 800×600 frame, that's ~110 MB/s of base64-encoded data through the PTY. Even GPU-accelerated terminals struggle to hit 60fps with this overhead.
+
+**Direct SDL rendering bypasses all of this:**
+
+```
+Raw pixels → SDL_UpdateTexture() → render
+```
+
+No encoding, no PTY, no parsing, no process boundary—just memory to GPU.
+
+**ink-sdl lets you combine both**: render game/emulator frames directly to SDL for performance, while reusing your existing Ink components for menus and UI in the same window. See [Using Existing SDL Window/Renderer](#using-existing-sdl-windowrenderer) for the pattern.
+
 ## Features
 
 - Full ANSI color support (16, 256, and 24-bit true color)

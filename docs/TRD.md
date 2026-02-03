@@ -6,13 +6,12 @@
 
 ### Problem Statement
 
-Ink applications are limited to terminal rendering, which has several constraints:
+Ink applications are limited to terminal rendering, which presents challenges for certain use cases:
 
-- Performance bottlenecks from terminal I/O
-- Limited color accuracy depending on terminal capabilities
-- No native window controls (minimize, maximize, resize via drag)
-- Inconsistent rendering across different terminal emulators
-- No HiDPI/Retina support controlled by the application
+- **Graphics protocol overhead**: Terminal image protocols (Kitty, iTerm2) require base64 encoding, escape sequence wrapping, and PTY transit—making 60fps graphics impractical even with GPU-accelerated terminals
+- **Mixed rendering**: Applications needing both high-framerate graphics (emulators, games, video) and Ink UI cannot efficiently share a terminal window
+- **Inconsistent rendering**: Different terminal emulators vary in ANSI support, color accuracy, and font rendering
+- **Limited control**: Applications cannot directly control HiDPI scaling, window decorations, or minimum window size
 
 ### Solution
 
@@ -340,6 +339,9 @@ sdl.destroyWindow(myWindow);
 | Erase    | `CSI K`, `CSI 0K`                  | Clear to end of line                   |
 | Erase    | `CSI 1K`                           | Clear to beginning of line             |
 | Erase    | `CSI 2K`                           | Clear entire line                      |
+| Screen   | `CSI ?1049h`                       | Switch to alt screen buffer            |
+| Screen   | `CSI ?1049l`                       | Switch to main screen buffer           |
+| Screen   | `CSI ?1047h/l`, `CSI ?47h/l`       | Alt screen buffer variants             |
 
 ### Control Characters
 
@@ -349,6 +351,23 @@ sdl.destroyWindow(myWindow);
 | Carriage Return | `\r` (0x0D) | Move to column 1              |
 | Tab             | `\t` (0x09) | Move to next 8-space tab stop |
 | Backspace       | `\b` (0x08) | Move cursor left one column   |
+
+### Alt Screen Buffer
+
+The alt screen buffer allows applications to switch to a separate screen buffer, preserving the main buffer's contents. This is commonly used by full-screen applications like vim, less, and htop.
+
+**Supported sequences:**
+
+- `\x1b[?1049h` - Enter alt screen (saves cursor, switches buffer, clears screen)
+- `\x1b[?1049l` - Leave alt screen (restores buffer and cursor)
+- `\x1b[?1047h/l` and `\x1b[?47h/l` - Alt screen variants (also supported)
+
+**Behavior:**
+
+1. When entering alt screen: cursor position is saved, alt buffer is activated and cleared
+2. When leaving alt screen: main buffer is restored, cursor position is restored
+3. Each buffer maintains its own render target texture
+4. Window resize recreates both buffer textures
 
 ## Keyboard Input Mapping
 
