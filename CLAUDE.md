@@ -174,6 +174,42 @@ pnpm check      # Format, lint, and typecheck (run before commits)
   };
   ```
 
+- **Typed errors over string messages**: When throwing errors, create a custom error class with a typed `code` property instead of using plain `Error` with string messages. This enables type-safe error handling:
+
+  ```typescript
+  // GOOD - typed error with machine-readable code
+  type MyErrorCode = "NOT_FOUND" | "PERMISSION_DENIED" | "TIMEOUT";
+
+  class MyError extends Error {
+    readonly code: MyErrorCode;
+    constructor(code: MyErrorCode) {
+      super(code);
+      this.name = "MyError";
+      this.code = code;
+    }
+  }
+
+  const isMyError = (error: unknown): error is MyError => {
+    return error instanceof MyError;
+  };
+
+  // Usage - callers get autocomplete and type checking
+  try {
+    await doSomething();
+  } catch (error) {
+    if (isMyError(error)) {
+      switch (error.code) {
+        case "NOT_FOUND": // TypeScript knows valid codes
+          // ...
+      }
+    }
+  }
+
+  // BAD - string messages aren't type-safe
+  throw new Error("Not found");
+  throw new Error("Permission denied");
+  ```
+
 - **Tests verify behavior, not implementation**: Tests should verify that code works correctly, not enshrine implementation details. Never write tests that just check constant values - if a constant matters, test the behavior it affects:
 
   ```typescript
