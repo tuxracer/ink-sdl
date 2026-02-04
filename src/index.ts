@@ -87,6 +87,7 @@ export {
   isSdlDependencyError,
 } from "./utils/SdlDependencyError";
 export {
+  isAutoInstallSupported,
   installMissingDependencies,
   InstallError,
   isInstallError,

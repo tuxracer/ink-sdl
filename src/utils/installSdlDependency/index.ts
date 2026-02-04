@@ -321,6 +321,22 @@ const installDependency = async (library: LibraryType): Promise<void> => {
 // ============================================================================
 
 /**
+ * Check if automatic dependency installation is supported on the current platform
+ *
+ * Returns true if a supported package manager is available (e.g., Homebrew on macOS,
+ * apt on Ubuntu/Debian, dnf on Fedora, pacman on Arch, etc.).
+ *
+ * Use this to determine whether to offer auto-installation to users before
+ * calling `installMissingDependencies()`.
+ */
+export const isAutoInstallSupported = (): boolean => {
+  // Check with SDL2 - the result will be the same for both libraries
+  // since it depends on platform/package manager, not the specific library
+  const command = getInstallCommand("SDL2");
+  return command.canAutoInstall;
+};
+
+/**
  * Detect and install missing SDL dependencies
  *
  * Checks if SDL2 and SDL2_ttf are available. If all dependencies are present,
