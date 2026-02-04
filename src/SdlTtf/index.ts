@@ -9,6 +9,7 @@ import koffi from "koffi";
 import { getSdl2, type SDLPointer, INT32_BYTES } from "../Sdl2";
 import { findLibrary } from "../utils/findLibrary";
 import { SdlDependencyError } from "../utils/SdlDependencyError";
+import { FontError } from "../utils/FontError";
 
 // SDL2_ttf library paths by platform
 const SDL_TTF_LIB_PATHS: Record<string, string[]> = {
@@ -155,7 +156,7 @@ export class SdlTtf {
   openFont(file: string, ptsize: number): SDLPointer {
     const font = this._TTF_OpenFont(file, ptsize);
     if (!font) {
-      throw new Error(`TTF_OpenFont failed: ${getSdl2().getError()}`);
+      throw new FontError("LOAD_FAILED", getSdl2().getError());
     }
     return font;
   }
@@ -181,7 +182,7 @@ export class SdlTtf {
     const color = { r, g, b, a };
     const surface = this._TTF_RenderUTF8_Blended(font, text, color);
     if (!surface) {
-      throw new Error(`TTF_RenderUTF8_Blended failed: ${getSdl2().getError()}`);
+      throw new FontError("RENDER_FAILED", getSdl2().getError());
     }
     return surface;
   }

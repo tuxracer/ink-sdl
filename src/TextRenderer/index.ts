@@ -29,6 +29,7 @@ import {
   EMOJI_FONTS,
   EMOJI_FONT_SCALE,
 } from "./consts";
+import { FontError } from "../utils/FontError";
 
 /**
  * Find the first existing path from a list of candidates
@@ -184,10 +185,9 @@ export class TextRenderer {
     }
 
     // If not found, throw a helpful error
-    throw new Error(
-      `Font "${fontName}" not found in system font directories.\n` +
-        `Searched directories:\n  - ${directories.join("\n  - ")}\n` +
-        `Tried extensions: ${extensions.join(", ")}`
+    throw new FontError(
+      "NOT_FOUND",
+      `Font "${fontName}" not found. Searched: ${directories.join(", ")}`
     );
   }
 
@@ -309,13 +309,13 @@ export class TextRenderer {
       this.font = this.ttf.openFont(fontPath, physicalSize);
       this.currentFontPath = fontPath;
     } catch (error) {
-      // Provide a helpful error message
       const fallbackPaths = this.getFallbackFontPaths();
-      const triedPaths = [fontPath, ...fallbackPaths].join("\n  - ");
-      throw new Error(
-        `Failed to load font: ${fontPath}\n` +
-          `Tried paths:\n  - ${triedPaths}\n` +
-          `Original error: ${error instanceof Error ? error.message : String(error)}`
+      const triedPaths = [fontPath, ...fallbackPaths].join(", ");
+      const originalError =
+        error instanceof Error ? error.message : String(error);
+      throw new FontError(
+        "LOAD_FAILED",
+        `${fontPath} (tried: ${triedPaths}). ${originalError}`
       );
     }
 

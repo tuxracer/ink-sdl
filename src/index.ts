@@ -92,3 +92,5 @@ export {
   isInstallError,
   type InstallErrorCode,
 } from "./utils/installSdlDependency";
+export { SdlError, isSdlError, type SdlErrorCode } from "./utils/SdlError";
+export { FontError, isFontError, type FontErrorCode } from "./utils/FontError";

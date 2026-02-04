@@ -49,6 +49,7 @@ export interface ExistingSdlResources {
 }
 import { TextRenderer } from "../TextRenderer";
 import { InputBridge } from "../InputBridge";
+import { SdlError } from "../utils/SdlError";
 import {
   COLOR_CHANNEL_MAX,
   DEFAULT_FONT_SIZE,
@@ -318,7 +319,7 @@ export class SdlUiRenderer {
     // Initialize SDL for events only (if not already initialized)
     // SDL_Init is idempotent and won't re-initialize already-initialized subsystems
     if (!this.sdl.init(SDL_INIT_EVENTS)) {
-      throw new Error("Failed to initialize SDL2 events");
+      throw new SdlError("INIT_FAILED", "Failed to initialize SDL2 events");
     }
 
     // Read dimensions from existing window
@@ -333,7 +334,10 @@ export class SdlUiRenderer {
   private initNewResources(options: SdlUiRendererOptions): void {
     // Initialize SDL
     if (!this.sdl.init(SDL_INIT_VIDEO | SDL_INIT_EVENTS)) {
-      throw new Error("Failed to initialize SDL2 for UI rendering");
+      throw new SdlError(
+        "INIT_FAILED",
+        "Failed to initialize SDL2 for UI rendering"
+      );
     }
 
     // We own the resources we create

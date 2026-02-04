@@ -9,6 +9,7 @@ import koffi from "koffi";
 import type { SDLPointer } from "./types";
 import { findLibrary } from "../utils/findLibrary";
 import { SdlDependencyError } from "../utils/SdlDependencyError";
+import { SdlError } from "../utils/SdlError";
 import {
   INT32_BYTES,
   SDL_EVENT_SIZE,
@@ -351,7 +352,7 @@ export class Sdl2 {
   ): SDLPointer {
     const window = this._SDL_CreateWindow(title, x, y, width, height, flags);
     if (!window) {
-      throw new Error(`SDL_CreateWindow failed: ${this._SDL_GetError()}`);
+      throw new SdlError("WINDOW_CREATION_FAILED", this._SDL_GetError());
     }
     return window;
   }
@@ -421,7 +422,7 @@ export class Sdl2 {
         SDL_RENDERER_SOFTWARE
       );
       if (!softwareRenderer) {
-        throw new Error(`SDL_CreateRenderer failed: ${this._SDL_GetError()}`);
+        throw new SdlError("RENDERER_CREATION_FAILED", this._SDL_GetError());
       }
       return softwareRenderer;
     }
@@ -492,7 +493,7 @@ export class Sdl2 {
       height
     );
     if (!texture) {
-      throw new Error(`SDL_CreateTexture failed: ${this._SDL_GetError()}`);
+      throw new SdlError("TEXTURE_CREATION_FAILED", this._SDL_GetError());
     }
     return texture;
   }
@@ -520,9 +521,7 @@ export class Sdl2 {
   ): SDLPointer {
     const texture = this._SDL_CreateTextureFromSurface(renderer, surface);
     if (!texture) {
-      throw new Error(
-        `SDL_CreateTextureFromSurface failed: ${this._SDL_GetError()}`
-      );
+      throw new SdlError("TEXTURE_CREATION_FAILED", this._SDL_GetError());
     }
     return texture;
   }
