@@ -232,16 +232,70 @@ Event emitter for window events.
 
 ### `isSdlAvailable()`
 
-Check if SDL is available on the system.
+Check if SDL dependencies (SDL2 and SDL2_ttf) are available on the system. Use this to decide whether to use SDL rendering or fall back to terminal mode.
 
 ```typescript
-import { isSdlAvailable } from "ink-sdl";
+import { isSdlAvailable, createSdlStreams } from "ink-sdl";
+import { render } from "ink";
 
 if (isSdlAvailable()) {
   // Use SDL rendering
+  const { stdin, stdout, window } = createSdlStreams({ title: "My App" });
+  render(<App />, { stdin, stdout });
 } else {
   // Fall back to terminal rendering
+  render(<App />);
 }
+```
+
+### `installMissingDependencies()`
+
+Interactively prompt the user to install missing SDL dependencies. Use this when you want to offer users the option to install dependencies rather than silently falling back.
+
+#### Returns
+
+`Promise<void>` - Resolves if all dependencies are present or successfully installed, rejects with `InstallError` otherwise.
+
+The promise resolves immediately if SDL2 and SDL2_ttf are already available.
+
+#### Error Codes
+
+On rejection, the error is an `InstallError` with a typed `code` property:
+
+| Code                    | Meaning                                                                                        |
+| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| `PLATFORM_NOT_SUPPORTED` | No supported package manager (Windows, macOS without Homebrew/MacPorts, unknown Linux distro) |
+| `NON_INTERACTIVE`        | stdin is not a TTY                                                                             |
+| `USER_DECLINED`          | User answered no to the prompt                                                                 |
+| `INSTALL_FAILED`         | Install command exited non-zero                                                                |
+
+#### Example
+
+```typescript
+import {
+  isSdlAvailable,
+  installMissingDependencies,
+  isInstallError,
+} from "ink-sdl";
+
+const startApp = async () => {
+  if (!isSdlAvailable()) {
+    try {
+      await installMissingDependencies();
+      console.log("Please restart the application.");
+      process.exit(0);
+    } catch (error) {
+      if (isInstallError(error)) {
+        // error.code is typed as InstallErrorCode
+        if (error.code === "USER_DECLINED") {
+          console.log("No problem, falling back to terminal mode.");
+        }
+      }
+    }
+  }
+
+  // Start the app (SDL or terminal mode)
+};
 ```
 
 ## Advanced Usage

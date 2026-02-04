@@ -81,8 +81,14 @@ export {
 } from "./Sdl2";
 export { getSdlTtf, SdlTtf } from "./SdlTtf";
 
-// Error handling
+// Error handling and dependency installation
 export {
   SdlDependencyError,
   isSdlDependencyError,
 } from "./utils/SdlDependencyError";
+export {
+  installMissingDependencies,
+  InstallError,
+  isInstallError,
+  type InstallErrorCode,
+} from "./utils/installSdlDependency";

@@ -13,6 +13,7 @@ import { createSdlStreams } from ".";
 import { render } from "ink";
 import { DemoApp } from "./Demo";
 import { isSdlDependencyError } from "./utils/SdlDependencyError";
+import { installMissingDependencies } from "./utils/installSdlDependency";
 
 // ============================================================================
 // Constants
@@ -115,46 +116,59 @@ const sdlOptions = {
 // Initialize SDL and Render
 // ============================================================================
 
-try {
-  const { stdin, stdout, window, renderer } = createSdlStreams(sdlOptions);
+const main = async () => {
+  try {
+    const { stdin, stdout, window, renderer } = createSdlStreams(sdlOptions);
 
-  const scaleFactor = renderer.getScaleFactor();
-  const initialFrameRate = window.getFrameRate();
-  const cacheStats = window.getCacheStats();
+    const scaleFactor = renderer.getScaleFactor();
+    const initialFrameRate = window.getFrameRate();
+    const cacheStats = window.getCacheStats();
 
-  // Subscribe to frame rate changes and return unsubscribe function
-  const onFrameRateChange = (callback: (frameRate: number) => void) => {
-    window.on("frameRateChange", callback);
-    return () => {
-      window.off("frameRateChange", callback);
+    // Subscribe to frame rate changes and return unsubscribe function
+    const onFrameRateChange = (callback: (frameRate: number) => void) => {
+      window.on("frameRateChange", callback);
+      return () => {
+        window.off("frameRateChange", callback);
+      };
     };
-  };
 
-  // Type assertions needed because ink's types expect tty.ReadStream/WriteStream
-  // but our SDL streams are compatible at runtime
-  render(
-    <DemoApp
-      scaleFactor={scaleFactor}
-      initialFrameRate={initialFrameRate}
-      onFrameRateChange={onFrameRateChange}
-      cacheStats={cacheStats}
-    />,
-    {
-      stdin: stdin as unknown as NodeJS.ReadStream,
-      stdout: stdout as unknown as NodeJS.WriteStream,
+    // Type assertions needed because ink's types expect tty.ReadStream/WriteStream
+    // but our SDL streams are compatible at runtime
+    render(
+      <DemoApp
+        scaleFactor={scaleFactor}
+        initialFrameRate={initialFrameRate}
+        onFrameRateChange={onFrameRateChange}
+        cacheStats={cacheStats}
+      />,
+      {
+        stdin: stdin as unknown as NodeJS.ReadStream,
+        stdout: stdout as unknown as NodeJS.WriteStream,
+      }
+    );
+
+    window.on("close", () => process.exit(0));
+    process.on("SIGINT", () => {
+      window.close();
+      process.exit(0);
+    });
+  } catch (error) {
+    if (isSdlDependencyError(error)) {
+      try {
+        // Offer to install missing dependencies
+        await installMissingDependencies();
+        // Installation succeeded - user needs to restart
+        process.exit(0);
+      } catch {
+        // Auto-install not available, user declined, or installation failed
+        // Show manual instructions
+        console.error(error.getFormattedMessage());
+        process.exit(1);
+      }
     }
-  );
-
-  window.on("close", () => process.exit(0));
-  process.on("SIGINT", () => {
-    window.close();
-    process.exit(0);
-  });
-} catch (error) {
-  if (isSdlDependencyError(error)) {
-    console.error(error.getFormattedMessage());
-    process.exit(1);
+    // Re-throw other errors
+    throw error;
   }
-  // Re-throw other errors
-  throw error;
-}
+};
+
+void main();
