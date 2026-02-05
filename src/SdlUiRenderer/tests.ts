@@ -2,8 +2,6 @@
  * Tests for SdlUiRenderer utilities
  */
 
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import { describe, it, expect } from "vitest";
 import { parseBackgroundColor } from ".";
 

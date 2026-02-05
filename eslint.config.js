@@ -96,4 +96,11 @@ export default [
       ],
     },
   },
+  // Disable magic numbers rule for test files
+  {
+    files: ['src/**/tests.ts'],
+    rules: {
+      '@typescript-eslint/no-magic-numbers': 'off',
+    },
+  },
 ];

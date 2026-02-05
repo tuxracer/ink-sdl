@@ -2,8 +2,6 @@
  * Tests for TextRenderer font resolution utilities
  */
 
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import { describe, it, expect } from "vitest";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";

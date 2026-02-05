@@ -2,8 +2,6 @@
  * Tests for SdlOutputStream
  */
 
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { SdlOutputStream } from ".";
 import type { SdlUiRenderer } from "../SdlUiRenderer";

@@ -2,8 +2,6 @@
  * Tests for SdlInputStream
  */
 
-/* eslint-disable @typescript-eslint/no-magic-numbers */
-
 import { describe, it, expect, beforeEach } from "vitest";
 import { SdlInputStream } from ".";
 
