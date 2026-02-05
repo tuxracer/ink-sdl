@@ -2,6 +2,24 @@
  * SdlUiRenderer Constants
  */
 
+import type { Color } from "../AnsiParser";
+
+/** Default background color (black) */
+export const DEFAULT_BG: Color = { r: 0, g: 0, b: 0 };
+
+/** Default foreground color (white) */
+export const DEFAULT_FG: Color = { r: 255, g: 255, b: 255 };
+
+/** Minimum brightness for text visibility */
+export const MIN_BRIGHTNESS = 100;
+
+/** Length of a 6-character hex color string (RRGGBB) */
+export const HEX_COLOR_LENGTH = 6;
+
+/** Slice indices for parsing hex color channels */
+export const HEX_R_END = 2;
+export const HEX_G_END = 4;
+
 /** Default window width in pixels */
 export const DEFAULT_WINDOW_WIDTH = 800;
 

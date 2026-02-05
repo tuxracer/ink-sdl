@@ -16,7 +16,16 @@ import type {
   InstallMissingDependenciesOptions,
 } from "./types";
 
+import {
+  OS_RELEASE_ID_PREFIX,
+  ANSI_BOLD,
+  ANSI_GREEN,
+  ANSI_YELLOW,
+  ANSI_RESET,
+} from "./consts";
+
 export * from "./types";
+export * from "./consts";
 
 // ============================================================================
 // Types
@@ -48,25 +57,6 @@ export class InstallError extends Error {
     this.code = code;
   }
 }
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-/** Prefix for distro ID in /etc/os-release */
-const OS_RELEASE_ID_PREFIX = "ID=";
-
-/** ANSI escape code for bold text */
-const ANSI_BOLD = "\x1b[1m";
-
-/** ANSI escape code for green text */
-const ANSI_GREEN = "\x1b[32m";
-
-/** ANSI escape code for yellow text */
-const ANSI_YELLOW = "\x1b[33m";
-
-/** ANSI escape code to reset formatting */
-const ANSI_RESET = "\x1b[0m";
 
 // ============================================================================
 // Linux Distribution Detection

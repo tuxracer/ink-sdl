@@ -263,3 +263,25 @@ export const SDL_DISPLAYMODE_REFRESH_RATE_OFFSET = 12;
 
 /** Default refresh rate to use when detection fails */
 export const DEFAULT_REFRESH_RATE = 60;
+
+// =============================================================================
+// Library Paths
+// =============================================================================
+
+/** SDL2 library paths by platform */
+export const SDL_LIB_PATHS: Record<string, string[]> = {
+  darwin: [
+    "/opt/homebrew/lib/libSDL2.dylib", // Homebrew ARM
+    "/usr/local/lib/libSDL2.dylib", // Homebrew Intel
+    "/opt/local/lib/libSDL2.dylib", // MacPorts
+    "libSDL2.dylib", // System path
+  ],
+  linux: [
+    "/usr/lib/x86_64-linux-gnu/libSDL2-2.0.so.0", // Debian/Ubuntu x64
+    "/usr/lib/aarch64-linux-gnu/libSDL2-2.0.so.0", // Debian/Ubuntu ARM64
+    "/usr/lib64/libSDL2-2.0.so.0", // Fedora/RHEL
+    "/usr/lib/libSDL2-2.0.so.0", // Arch
+    "libSDL2-2.0.so.0", // System path
+  ],
+  win32: ["SDL2.dll", "C:\\Windows\\System32\\SDL2.dll"],
+};

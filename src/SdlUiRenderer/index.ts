@@ -57,16 +57,13 @@ import {
   UNDERLINE_POSITION,
   STRIKETHROUGH_POSITION,
   TEXT_DECORATION_THICKNESS,
+  DEFAULT_BG,
+  DEFAULT_FG,
+  MIN_BRIGHTNESS,
+  HEX_COLOR_LENGTH,
+  HEX_R_END,
+  HEX_G_END,
 } from "./consts";
-
-/** Default background color (black) */
-const DEFAULT_BG: Color = { r: 0, g: 0, b: 0 };
-
-/** Default foreground color (white) */
-const DEFAULT_FG: Color = { r: 255, g: 255, b: 255 };
-
-/** Minimum brightness for text visibility */
-const MIN_BRIGHTNESS = 100;
 
 /**
  * Adjust color brightness by a multiplier, optionally clamping to max channel value
@@ -86,13 +83,6 @@ const adjustBrightness = (
     ? Math.min(COLOR_CHANNEL_MAX, Math.floor(color.b * multiplier))
     : Math.floor(color.b * multiplier),
 });
-
-/** Length of a 6-character hex color string (RRGGBB) */
-const HEX_COLOR_LENGTH = 6;
-
-/** Slice indices for parsing hex color channels */
-const HEX_R_END = 2;
-const HEX_G_END = 4;
 
 /**
  * Parse a background color from various formats

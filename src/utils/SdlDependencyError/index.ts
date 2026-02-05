@@ -8,7 +8,15 @@
 import { existsSync, readFileSync } from "node:fs";
 import { platform } from "node:os";
 
+import {
+  OS_RELEASE_ID_PREFIX,
+  OS_RELEASE_NAME_PREFIX,
+  ANSI_RED,
+  ANSI_RESET,
+} from "./consts";
+
 export * from "./types";
+export * from "./consts";
 
 // ============================================================================
 // Types
@@ -20,22 +28,6 @@ interface LinuxDistro {
   id: string;
   name: string;
 }
-
-// ============================================================================
-// Constants
-// ============================================================================
-
-/** Prefix for distro ID in /etc/os-release */
-const OS_RELEASE_ID_PREFIX = "ID=";
-
-/** Prefix for distro name in /etc/os-release */
-const OS_RELEASE_NAME_PREFIX = "NAME=";
-
-/** ANSI escape code for red text */
-const ANSI_RED = "\x1b[31m";
-
-/** ANSI escape code to reset formatting */
-const ANSI_RESET = "\x1b[0m";
 
 // ============================================================================
 // Linux Distribution Detection
