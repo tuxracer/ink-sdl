@@ -107,7 +107,7 @@ const HEX_G_END = 4;
 /**
  * Parse a background color from various formats
  */
-const parseBackgroundColor = (
+export const parseBackgroundColor = (
   color: [number, number, number] | string | undefined
 ): Color => {
   if (!color) {
