@@ -82,16 +82,22 @@ pnpm check      # Format, lint, and typecheck (run before commits)
   - `consts.ts` - Module-specific constants
   - `types.ts` - Module-specific type definitions (if needed)
 
-- **Avoid re-exports**: Don't re-export from index.ts or create barrel files. Re-exports obscure where code actually lives, create unnecessary coupling between modules, and make it harder to trace imports. Import directly from the source file:
+- **Re-export types and consts from index.ts**: Each module's `index.ts` should re-export all types and consts from `types.ts` and `consts.ts`. External code should import from the module, not directly from internal files:
 
   ```typescript
-  // GOOD - import directly from source
-  import { TICK_RATE } from "../Game/consts";
-  import { showTitleScreen } from "../TitleScreen";
+  // GOOD - import from the module
+  import { TICK_RATE, GameState } from "../Game";
 
-  // BAD - re-exporting creates indirection and coupling
-  // In Game/index.ts:
-  export { TICK_RATE } from "./consts"; // Don't do this
+  // BAD - importing directly from internal module files
+  import { TICK_RATE } from "../Game/consts";
+  import type { GameState } from "../Game/types";
+  ```
+
+  In `Game/index.ts`:
+
+  ```typescript
+  export * from "./consts";
+  export * from "./types";
   ```
 
 - **JSDoc**: Skip `@param`/`@returns` tags (TypeScript provides types); use inline comments if needed
