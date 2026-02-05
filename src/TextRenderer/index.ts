@@ -34,7 +34,7 @@ import { FontError } from "../utils/FontError";
 /**
  * Find the first existing path from a list of candidates
  */
-const findFirstExisting = (paths: string[]): string | null => {
+export const findFirstExisting = (paths: string[]): string | null => {
   for (const p of paths) {
     try {
       if (existsSync(p)) {
