@@ -125,7 +125,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
   }
   ```
 
-- **Type guards over type assertions**: Never use `as` type assertions on values with unknown runtime types. Use type guards from Remeda (`isString`, `isNumber`, `isBoolean`, `isPlainObject`), existing custom guards from `src/utils/type-guards.ts`, or create a new custom type guard if none exist:
+- **Type guards over type assertions**: Never use `as` type assertions on values with unknown runtime types. Use type guards from Remeda (`isString`, `isNumber`, `isBoolean`, `isPlainObject`) or create a new custom type guard if none exist:
 
   ```typescript
   // GOOD - type guard validates at runtime
@@ -143,7 +143,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
 
   ```typescript
   // GOOD - validates the value is one of the allowed options
-  import { isPostProcessingMode } from "../../utils/type-guards";
+  import { isPostProcessingMode } from "../VideoConfig";
 
   if (isPostProcessingMode(value)) {
     config.video_postprocessing_mode = value; // No cast needed
