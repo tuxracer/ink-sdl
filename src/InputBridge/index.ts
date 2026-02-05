@@ -51,16 +51,9 @@ import {
   FUNCTION_KEY_OFFSET_10,
 } from "./consts";
 
-/**
- * Terminal-style key event for Ink
- */
-export interface InkKeyEvent {
-  sequence: string;
-  name: string;
-  ctrl: boolean;
-  meta: boolean;
-  shift: boolean;
-}
+import type { InkKeyEvent } from "./types";
+
+export * from "./types";
 
 /**
  * Track modifier key state

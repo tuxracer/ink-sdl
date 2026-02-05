@@ -4,8 +4,9 @@
  * Typed error class for font loading and rendering failures.
  */
 
-/** Error codes for font failures */
-export type FontErrorCode = "NOT_FOUND" | "LOAD_FAILED" | "RENDER_FAILED";
+import type { FontErrorCode } from "./types";
+
+export * from "./types";
 
 /**
  * Error thrown when a font operation fails
@@ -23,10 +24,3 @@ export class FontError extends Error {
     this.details = details;
   }
 }
-
-/**
- * Check if an error is a FontError
- */
-export const isFontError = (error: unknown): error is FontError => {
-  return error instanceof FontError;
-};

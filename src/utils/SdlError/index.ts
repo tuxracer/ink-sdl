@@ -4,12 +4,9 @@
  * Typed error class for SDL operation failures.
  */
 
-/** Error codes for SDL failures */
-export type SdlErrorCode =
-  | "INIT_FAILED"
-  | "WINDOW_CREATION_FAILED"
-  | "RENDERER_CREATION_FAILED"
-  | "TEXTURE_CREATION_FAILED";
+import type { SdlErrorCode } from "./types";
+
+export * from "./types";
 
 /**
  * Error thrown when an SDL operation fails
@@ -27,10 +24,3 @@ export class SdlError extends Error {
     this.sdlMessage = sdlMessage;
   }
 }
-
-/**
- * Check if an error is an SdlError
- */
-export const isSdlError = (error: unknown): error is SdlError => {
-  return error instanceof SdlError;
-};

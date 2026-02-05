@@ -8,6 +8,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { platform } from "node:os";
 
+export * from "./types";
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -249,12 +251,3 @@ export class SdlDependencyError extends Error {
     return lines.join("\n");
   }
 }
-
-/**
- * Check if an error is an SdlDependencyError
- */
-export const isSdlDependencyError = (
-  error: unknown
-): error is SdlDependencyError => {
-  return error instanceof SdlDependencyError;
-};

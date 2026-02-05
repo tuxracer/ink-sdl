@@ -11,6 +11,12 @@ import { platform } from "node:os";
 import { existsSync, readFileSync } from "node:fs";
 import { isSdl2Available } from "../../Sdl2";
 import { isSdlTtfAvailable } from "../../SdlTtf";
+import type {
+  InstallErrorCode,
+  InstallMissingDependenciesOptions,
+} from "./types";
+
+export * from "./types";
 
 // ============================================================================
 // Types
@@ -30,32 +36,6 @@ interface LinuxDistro {
   name: string;
 }
 
-/** Error codes for install failures */
-export type InstallErrorCode =
-  | "PLATFORM_NOT_SUPPORTED"
-  | "NON_INTERACTIVE"
-  | "USER_DECLINED"
-  | "INSTALL_FAILED";
-
-/**
- * Options for installMissingDependencies
- */
-export interface InstallMissingDependenciesOptions {
-  /**
-   * Skip the built-in interactive prompt.
-   * When true, `userAccepted` determines whether to proceed with installation.
-   * This allows you to implement your own confirmation UI.
-   */
-  skipPrompt?: boolean;
-
-  /**
-   * Whether the user accepted installation.
-   * Only used when `skipPrompt` is true.
-   * If false or undefined, throws InstallError with code "USER_DECLINED".
-   */
-  userAccepted?: boolean;
-}
-
 /**
  * Error thrown when dependency installation fails
  */
@@ -68,13 +48,6 @@ export class InstallError extends Error {
     this.code = code;
   }
 }
-
-/**
- * Check if an error is an InstallError
- */
-export const isInstallError = (error: unknown): error is InstallError => {
-  return error instanceof InstallError;
-};
 
 // ============================================================================
 // Constants
