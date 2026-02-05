@@ -38,6 +38,25 @@ export type InstallErrorCode =
   | "INSTALL_FAILED";
 
 /**
+ * Options for installMissingDependencies
+ */
+export interface InstallMissingDependenciesOptions {
+  /**
+   * Skip the built-in interactive prompt.
+   * When true, `userAccepted` determines whether to proceed with installation.
+   * This allows you to implement your own confirmation UI.
+   */
+  skipPrompt?: boolean;
+
+  /**
+   * Whether the user accepted installation.
+   * Only used when `skipPrompt` is true.
+   * If false or undefined, throws InstallError with code "USER_DECLINED".
+   */
+  userAccepted?: boolean;
+}
+
+/**
  * Error thrown when dependency installation fails
  */
 export class InstallError extends Error {
@@ -341,13 +360,26 @@ export const isAutoInstallSupported = (): boolean => {
  *
  * Checks if SDL2 and SDL2_ttf are available. If all dependencies are present,
  * resolves immediately. If dependencies are missing, prompts the user to
- * install them.
+ * install them (unless `skipPrompt` is true).
  *
- * Resolves if all dependencies are present or successfully installed.
- * Rejects if auto-installation is not supported, the user declines,
- * or installation fails.
+ * @param options - Configuration options
+ * @param options.skipPrompt - Skip the built-in prompt and use `userAccepted` instead
+ * @param options.userAccepted - Whether the user accepted (only used with `skipPrompt`)
+ *
+ * @example
+ * // Default behavior - uses built-in prompt
+ * await installMissingDependencies();
+ *
+ * @example
+ * // Custom UI - you handle the prompt, we handle installation
+ * const accepted = await myCustomPrompt("Install SDL dependencies?");
+ * await installMissingDependencies({ skipPrompt: true, userAccepted: accepted });
  */
-export const installMissingDependencies = async (): Promise<void> => {
+export const installMissingDependencies = async (
+  options: InstallMissingDependenciesOptions = {}
+): Promise<void> => {
+  const { skipPrompt = false, userAccepted = false } = options;
+
   // Check which dependencies are missing
   const missingDeps: LibraryType[] = [];
 
@@ -363,11 +395,6 @@ export const installMissingDependencies = async (): Promise<void> => {
     return;
   }
 
-  // Check if stdin is a TTY (interactive terminal)
-  if (!process.stdin.isTTY) {
-    throw new InstallError("NON_INTERACTIVE");
-  }
-
   // Check if auto-install is supported for all missing deps
   for (const lib of missingDeps) {
     const command = getInstallCommand(lib);
@@ -376,15 +403,27 @@ export const installMissingDependencies = async (): Promise<void> => {
     }
   }
 
-  // Prompt user
-  const depsText = missingDeps.join(" and ");
-  console.log(
-    `\n${ANSI_YELLOW}${depsText} ${missingDeps.length === 1 ? "is" : "are"} required but not found.${ANSI_RESET}\n`
-  );
+  // Determine if we should install
+  let shouldInstall: boolean;
 
-  const shouldInstall = await promptYesNo(
-    `Would you like to install ${missingDeps.length === 1 ? "it" : "them"} now? [y/N] `
-  );
+  if (skipPrompt) {
+    // Developer is handling the prompt - use their answer
+    shouldInstall = userAccepted;
+  } else {
+    // Use built-in prompt - check if stdin is a TTY first
+    if (!process.stdin.isTTY) {
+      throw new InstallError("NON_INTERACTIVE");
+    }
+
+    const depsText = missingDeps.join(" and ");
+    console.log(
+      `\n${ANSI_YELLOW}${depsText} ${missingDeps.length === 1 ? "is" : "are"} required but not found.${ANSI_RESET}\n`
+    );
+
+    shouldInstall = await promptYesNo(
+      `Would you like to install ${missingDeps.length === 1 ? "it" : "them"} now? [y/N] `
+    );
+  }
 
   if (!shouldInstall) {
     throw new InstallError("USER_DECLINED");

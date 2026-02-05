@@ -248,9 +248,36 @@ if (isSdlAvailable()) {
 }
 ```
 
-### `installMissingDependencies()`
+### `isAutoInstallSupported()`
 
-Interactively prompt the user to install missing SDL dependencies. Use this when you want to offer users the option to install dependencies rather than silently falling back.
+Check if automatic SDL dependency installation is supported on the current platform.
+
+Returns `true` if a supported package manager is available:
+
+- **macOS**: Homebrew or MacPorts
+- **Linux**: apt (Debian/Ubuntu), dnf (Fedora/RHEL), pacman (Arch), zypper (openSUSE), apk (Alpine)
+- **Windows**: Returns `false` (manual installation required)
+
+```typescript
+import { isAutoInstallSupported } from "ink-sdl";
+
+if (isAutoInstallSupported()) {
+  // Can offer auto-installation
+} else {
+  // Show manual installation instructions
+}
+```
+
+### `installMissingDependencies(options?)`
+
+Install missing SDL dependencies. By default, shows an interactive prompt. Use the `skipPrompt` option to provide your own UI.
+
+#### Options
+
+| Option         | Type      | Default | Description                                           |
+| -------------- | --------- | ------- | ----------------------------------------------------- |
+| `skipPrompt`   | `boolean` | `false` | Skip the built-in prompt and use `userAccepted`       |
+| `userAccepted` | `boolean` | `false` | Whether the user accepted (only used with `skipPrompt`) |
 
 #### Returns
 
@@ -262,14 +289,14 @@ The promise resolves immediately if SDL2 and SDL2_ttf are already available.
 
 On rejection, the error is an `InstallError` with a typed `code` property:
 
-| Code                    | Meaning                                                                                        |
-| ----------------------- | ---------------------------------------------------------------------------------------------- |
+| Code                     | Meaning                                                                                        |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
 | `PLATFORM_NOT_SUPPORTED` | No supported package manager (Windows, macOS without Homebrew/MacPorts, unknown Linux distro) |
-| `NON_INTERACTIVE`        | stdin is not a TTY                                                                             |
+| `NON_INTERACTIVE`        | stdin is not a TTY (only when using built-in prompt)                                           |
 | `USER_DECLINED`          | User answered no to the prompt                                                                 |
 | `INSTALL_FAILED`         | Install command exited non-zero                                                                |
 
-#### Example
+#### Basic Example
 
 ```typescript
 import {
@@ -295,6 +322,80 @@ const startApp = async () => {
   }
 
   // Start the app (SDL or terminal mode)
+};
+```
+
+#### Custom Ink Prompt Example
+
+You can provide your own Ink-based UI for the installation prompt. Since SDL isn't available yet, render the prompt to the terminal first, then switch to SDL after installation.
+
+```tsx
+import React from "react";
+import { render, Box, Text } from "ink";
+import { ConfirmInput } from "@inkjs/ui";
+import {
+  isSdlAvailable,
+  isSdl2Available,
+  isSdlTtfAvailable,
+  isAutoInstallSupported,
+  installMissingDependencies,
+  createSdlStreams,
+} from "ink-sdl";
+
+// Custom Ink prompt component (renders to terminal, not SDL)
+const InstallPrompt = ({
+  missing,
+  onConfirm,
+}: {
+  missing: string[];
+  onConfirm: (yes: boolean) => void;
+}) => (
+  <Box flexDirection="column" gap={1}>
+    <Text color="yellow">
+      {missing.join(" and ")} {missing.length === 1 ? "is" : "are"} required but
+      not found.
+    </Text>
+    <Box>
+      <Text>Would you like to install {missing.length === 1 ? "it" : "them"} now? </Text>
+      <ConfirmInput
+        defaultChoice="confirm"
+        onConfirm={() => onConfirm(true)}
+        onCancel={() => onConfirm(false)}
+      />
+    </Box>
+  </Box>
+);
+
+const main = async () => {
+  if (!isSdlAvailable() && isAutoInstallSupported()) {
+    // Determine what's missing for the prompt
+    const missing: string[] = [];
+    if (!isSdl2Available()) missing.push("SDL2");
+    if (!isSdlTtfAvailable()) missing.push("SDL2_ttf");
+
+    // Render Ink prompt to terminal (not SDL - it's not available yet!)
+    const accepted = await new Promise<boolean>((resolve) => {
+      const { unmount } = render(
+        <InstallPrompt
+          missing={missing}
+          onConfirm={(yes) => {
+            unmount();
+            resolve(yes);
+          }}
+        />
+      );
+    });
+
+    // Pass the user's answer - ink-sdl handles installation and shows output
+    await installMissingDependencies({ skipPrompt: true, userAccepted: accepted });
+    console.log("Please restart the application.");
+    process.exit(0);
+  }
+
+  // Now SDL is available - render your app to SDL
+  const { stdin, stdout, window } = createSdlStreams({ title: "My App" });
+  render(<App />, { stdin, stdout });
+  window.on("close", () => process.exit(0));
 };
 ```
 

@@ -89,6 +89,7 @@ export {
 export {
   isAutoInstallSupported,
   installMissingDependencies,
+  type InstallMissingDependenciesOptions,
   InstallError,
   isInstallError,
   type InstallErrorCode,
