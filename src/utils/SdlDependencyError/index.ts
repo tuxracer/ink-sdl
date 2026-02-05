@@ -14,20 +14,10 @@ import {
   ANSI_RED,
   ANSI_RESET,
 } from "./consts";
+import type { LibraryType, LinuxDistro } from "./types";
 
 export * from "./types";
 export * from "./consts";
-
-// ============================================================================
-// Types
-// ============================================================================
-
-type LibraryType = "SDL2" | "SDL2_ttf";
-
-interface LinuxDistro {
-  id: string;
-  name: string;
-}
 
 // ============================================================================
 // Linux Distribution Detection
