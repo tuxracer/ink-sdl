@@ -30,6 +30,9 @@ import {
   EMOJI_FONT_SCALE,
 } from "./consts";
 import { FontError } from "../utils/FontError";
+import type { CachedGlyph } from "./types";
+
+export * from "./types";
 
 /**
  * Find the first existing path from a list of candidates
@@ -56,16 +59,6 @@ const getPlatformPaths = (
   const plat = platform();
   return [...(pathMap[plat] ?? [])];
 };
-
-/**
- * Cached glyph texture with metadata
- */
-interface CachedGlyph {
-  texture: SDLPointer;
-  width: number;
-  height: number;
-  lastUsed: number;
-}
 
 /**
  * SDL Text Renderer

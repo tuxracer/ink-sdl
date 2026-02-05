@@ -14,6 +14,9 @@ import { isSdlTtfAvailable } from "../../SdlTtf";
 import type {
   InstallErrorCode,
   InstallMissingDependenciesOptions,
+  LibraryType,
+  LinuxDistro,
+  InstallCommand,
 } from "./types";
 
 import {
@@ -26,24 +29,6 @@ import {
 
 export * from "./types";
 export * from "./consts";
-
-// ============================================================================
-// Types
-// ============================================================================
-
-type LibraryType = "SDL2" | "SDL2_ttf";
-
-interface InstallCommand {
-  /** Command arguments (e.g., ["brew", "install", "sdl2"]) */
-  args: string[];
-  /** Whether this platform supports auto-installation */
-  canAutoInstall: boolean;
-}
-
-interface LinuxDistro {
-  id: string;
-  name: string;
-}
 
 /**
  * Error thrown when dependency installation fails

@@ -51,18 +51,9 @@ import {
   FUNCTION_KEY_OFFSET_10,
 } from "./consts";
 
-import type { InkKeyEvent } from "./types";
+import type { InkKeyEvent, ModifierState } from "./types";
 
 export * from "./types";
-
-/**
- * Track modifier key state
- */
-interface ModifierState {
-  shift: boolean;
-  ctrl: boolean;
-  alt: boolean;
-}
 
 /**
  * SDL to Terminal Input Bridge

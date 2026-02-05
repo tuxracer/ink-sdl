@@ -19,3 +19,10 @@ export const SDL_TTF_LIB_PATHS: Record<string, string[]> = {
   ],
   win32: ["SDL2_ttf.dll", "C:\\Windows\\System32\\SDL2_ttf.dll"],
 };
+
+// TTF Style constants
+export const TTF_STYLE_NORMAL = 0x00;
+export const TTF_STYLE_BOLD = 0x01;
+export const TTF_STYLE_ITALIC = 0x02;
+export const TTF_STYLE_UNDERLINE = 0x04;
+export const TTF_STYLE_STRIKETHROUGH = 0x08;

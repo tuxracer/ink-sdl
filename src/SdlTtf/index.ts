@@ -217,13 +217,6 @@ export class SdlTtf {
   }
 }
 
-// TTF Style constants
-export const TTF_STYLE_NORMAL = 0x00;
-export const TTF_STYLE_BOLD = 0x01;
-export const TTF_STYLE_ITALIC = 0x02;
-export const TTF_STYLE_UNDERLINE = 0x04;
-export const TTF_STYLE_STRIKETHROUGH = 0x08;
-
 // Singleton instance (lazy-loaded)
 let ttfInstance: SdlTtf | null = null;
 

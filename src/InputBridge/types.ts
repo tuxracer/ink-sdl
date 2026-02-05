@@ -8,3 +8,12 @@ export interface InkKeyEvent {
   meta: boolean;
   shift: boolean;
 }
+
+/**
+ * Track modifier key state
+ */
+export interface ModifierState {
+  shift: boolean;
+  ctrl: boolean;
+  alt: boolean;
+}

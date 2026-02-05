@@ -1,5 +1,8 @@
 import { InstallError } from ".";
 
+// Re-export types from SdlDependencyError (shared between both modules)
+export type { LibraryType, LinuxDistro } from "../SdlDependencyError";
+
 /** Error codes for install failures */
 export type InstallErrorCode =
   | "PLATFORM_NOT_SUPPORTED"
@@ -32,3 +35,13 @@ export interface InstallMissingDependenciesOptions {
 export const isInstallError = (error: unknown): error is InstallError => {
   return error instanceof InstallError;
 };
+
+/**
+ * Install command configuration for a package manager
+ */
+export interface InstallCommand {
+  /** Command arguments (e.g., ["brew", "install", "sdl2"]) */
+  args: string[];
+  /** Whether this platform supports auto-installation */
+  canAutoInstall: boolean;
+}
