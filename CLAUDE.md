@@ -77,10 +77,29 @@ pnpm check      # Format, lint, and typecheck (run before commits)
   ```
 
   Standard files within a module directory:
-  - `index.ts` - Main module implementation and exports
-  - `index.test.ts` - Tests for the module
-  - `consts.ts` - Module-specific constants
-  - `types.ts` - Module-specific type definitions (if needed)
+  - `index.ts` - Main module implementation and exports (no constants or type definitions here)
+  - `tests.ts` - Tests for the module
+  - `consts.ts` - **All** module-specific constants (primitives, arrays, objects)
+  - `types.ts` - **All** type definitions, interfaces, and type guards
+
+- **Keep index.ts focused on implementation**: The `index.ts` file should only contain the main implementation (classes, functions). All constants go in `consts.ts` and all types/interfaces/type guards go in `types.ts`. This keeps files focused and makes it easy to find things:
+
+  ```typescript
+  // BAD - constants defined in index.ts
+  // Game/index.ts
+  const DEFAULT_SPEED = 10;
+  const MAX_PLAYERS = 4;
+  export class Game { ... }
+
+  // GOOD - constants in consts.ts, imported into index.ts
+  // Game/consts.ts
+  export const DEFAULT_SPEED = 10;
+  export const MAX_PLAYERS = 4;
+
+  // Game/index.ts
+  import { DEFAULT_SPEED, MAX_PLAYERS } from "./consts";
+  export class Game { ... }
+  ```
 
 - **Re-export types and consts from index.ts**: Each module's `index.ts` should re-export all types and consts from `types.ts` and `consts.ts`. External code should import from the module, not directly from internal files:
 
@@ -96,8 +115,13 @@ pnpm check      # Format, lint, and typecheck (run before commits)
   In `Game/index.ts`:
 
   ```typescript
+  import { DEFAULT_SPEED, MAX_PLAYERS } from "./consts";
+  import type { GameState } from "./types";
+
   export * from "./consts";
   export * from "./types";
+
+  // ... implementation using the imported constants and types
   ```
 
 - **JSDoc**: Skip `@param`/`@returns` tags (TypeScript provides types); use inline comments if needed
