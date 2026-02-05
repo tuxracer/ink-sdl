@@ -51,3 +51,63 @@ export const ANSI_CUBE_STEP = 40;
 
 /** Cube base for non-zero values */
 export const ANSI_CUBE_BASE = 55;
+
+/** ANSI 16 basic colors (normal intensity) */
+export const ANSI_COLORS_NORMAL: Color[] = [
+  { r: 0, g: 0, b: 0 }, // 0: Black
+  { r: 187, g: 0, b: 0 }, // 1: Red
+  { r: 0, g: 187, b: 0 }, // 2: Green
+  { r: 187, g: 187, b: 0 }, // 3: Yellow
+  { r: 0, g: 0, b: 187 }, // 4: Blue
+  { r: 187, g: 0, b: 187 }, // 5: Magenta
+  { r: 0, g: 187, b: 187 }, // 6: Cyan
+  { r: 187, g: 187, b: 187 }, // 7: White
+];
+
+/** ANSI 16 basic colors (bright/bold intensity) */
+export const ANSI_COLORS_BRIGHT: Color[] = [
+  { r: 85, g: 85, b: 85 }, // 8: Bright Black (Gray)
+  { r: 255, g: 85, b: 85 }, // 9: Bright Red
+  { r: 85, g: 255, b: 85 }, // 10: Bright Green
+  { r: 255, g: 255, b: 85 }, // 11: Bright Yellow
+  { r: 85, g: 85, b: 255 }, // 12: Bright Blue
+  { r: 255, g: 85, b: 255 }, // 13: Bright Magenta
+  { r: 85, g: 255, b: 255 }, // 14: Bright Cyan
+  { r: 255, g: 255, b: 255 }, // 15: Bright White
+];
+
+/** SGR code constants */
+export const SGR_RESET = 0;
+export const SGR_BOLD = 1;
+export const SGR_DIM = 2;
+export const SGR_ITALIC = 3;
+export const SGR_UNDERLINE = 4;
+export const SGR_REVERSE = 7;
+export const SGR_STRIKETHROUGH = 9;
+export const SGR_NORMAL_INTENSITY = 22;
+export const SGR_NO_ITALIC = 23;
+export const SGR_NO_UNDERLINE = 24;
+export const SGR_NO_REVERSE = 27;
+export const SGR_NO_STRIKETHROUGH = 29;
+export const SGR_FG_BASE = 30;
+export const SGR_FG_END = 37;
+export const SGR_FG_DEFAULT = 39;
+export const SGR_BG_BASE = 40;
+export const SGR_BG_END = 47;
+export const SGR_BG_DEFAULT = 49;
+export const SGR_FG_BRIGHT_BASE = 90;
+export const SGR_FG_BRIGHT_END = 97;
+export const SGR_BG_BRIGHT_BASE = 100;
+export const SGR_BG_BRIGHT_END = 107;
+export const SGR_EXTENDED = 38;
+export const SGR_EXTENDED_BG = 48;
+export const EXTENDED_256 = 5;
+export const EXTENDED_RGB = 2;
+
+/** ANSI 256 color cube constants */
+export const COLOR_CUBE_START = 16;
+export const COLOR_CUBE_END = 231;
+export const GRAYSCALE_START = 232;
+export const GRAYSCALE_END = 255;
+export const GRAYSCALE_STEP = 10;
+export const GRAYSCALE_BASE = 8;

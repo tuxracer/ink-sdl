@@ -23,71 +23,45 @@ import {
   ANSI_256_COLOR_LEVELS,
   DEFAULT_FG,
   DEFAULT_BG,
+  ANSI_COLORS_NORMAL,
+  ANSI_COLORS_BRIGHT,
+  SGR_RESET,
+  SGR_BOLD,
+  SGR_DIM,
+  SGR_ITALIC,
+  SGR_UNDERLINE,
+  SGR_REVERSE,
+  SGR_STRIKETHROUGH,
+  SGR_NORMAL_INTENSITY,
+  SGR_NO_ITALIC,
+  SGR_NO_UNDERLINE,
+  SGR_NO_REVERSE,
+  SGR_NO_STRIKETHROUGH,
+  SGR_FG_BASE,
+  SGR_FG_END,
+  SGR_FG_DEFAULT,
+  SGR_BG_BASE,
+  SGR_BG_END,
+  SGR_BG_DEFAULT,
+  SGR_FG_BRIGHT_BASE,
+  SGR_FG_BRIGHT_END,
+  SGR_BG_BRIGHT_BASE,
+  SGR_BG_BRIGHT_END,
+  SGR_EXTENDED,
+  SGR_EXTENDED_BG,
+  EXTENDED_256,
+  EXTENDED_RGB,
+  COLOR_CUBE_START,
+  COLOR_CUBE_END,
+  GRAYSCALE_START,
+  GRAYSCALE_END,
+  GRAYSCALE_STEP,
+  GRAYSCALE_BASE,
 } from "./consts";
 
 import type { Color, DrawCommand } from "./types";
 
 export * from "./types";
-
-/** ANSI 16 basic colors (normal intensity) */
-const ANSI_COLORS_NORMAL: Color[] = [
-  { r: 0, g: 0, b: 0 }, // 0: Black
-  { r: 187, g: 0, b: 0 }, // 1: Red
-  { r: 0, g: 187, b: 0 }, // 2: Green
-  { r: 187, g: 187, b: 0 }, // 3: Yellow
-  { r: 0, g: 0, b: 187 }, // 4: Blue
-  { r: 187, g: 0, b: 187 }, // 5: Magenta
-  { r: 0, g: 187, b: 187 }, // 6: Cyan
-  { r: 187, g: 187, b: 187 }, // 7: White
-];
-
-/** ANSI 16 basic colors (bright/bold intensity) */
-const ANSI_COLORS_BRIGHT: Color[] = [
-  { r: 85, g: 85, b: 85 }, // 8: Bright Black (Gray)
-  { r: 255, g: 85, b: 85 }, // 9: Bright Red
-  { r: 85, g: 255, b: 85 }, // 10: Bright Green
-  { r: 255, g: 255, b: 85 }, // 11: Bright Yellow
-  { r: 85, g: 85, b: 255 }, // 12: Bright Blue
-  { r: 255, g: 85, b: 255 }, // 13: Bright Magenta
-  { r: 85, g: 255, b: 255 }, // 14: Bright Cyan
-  { r: 255, g: 255, b: 255 }, // 15: Bright White
-];
-
-/** SGR code constants */
-const SGR_RESET = 0;
-const SGR_BOLD = 1;
-const SGR_DIM = 2;
-const SGR_ITALIC = 3;
-const SGR_UNDERLINE = 4;
-const SGR_REVERSE = 7;
-const SGR_STRIKETHROUGH = 9;
-const SGR_NORMAL_INTENSITY = 22;
-const SGR_NO_ITALIC = 23;
-const SGR_NO_UNDERLINE = 24;
-const SGR_NO_REVERSE = 27;
-const SGR_NO_STRIKETHROUGH = 29;
-const SGR_FG_BASE = 30;
-const SGR_FG_END = 37;
-const SGR_FG_DEFAULT = 39;
-const SGR_BG_BASE = 40;
-const SGR_BG_END = 47;
-const SGR_BG_DEFAULT = 49;
-const SGR_FG_BRIGHT_BASE = 90;
-const SGR_FG_BRIGHT_END = 97;
-const SGR_BG_BRIGHT_BASE = 100;
-const SGR_BG_BRIGHT_END = 107;
-const SGR_EXTENDED = 38;
-const SGR_EXTENDED_BG = 48;
-const EXTENDED_256 = 5;
-const EXTENDED_RGB = 2;
-
-/** ANSI 256 color cube constants */
-const COLOR_CUBE_START = 16;
-const COLOR_CUBE_END = 231;
-const GRAYSCALE_START = 232;
-const GRAYSCALE_END = 255;
-const GRAYSCALE_STEP = 10;
-const GRAYSCALE_BASE = 8;
 
 /**
  * Convert ANSI 256-color index to RGB
