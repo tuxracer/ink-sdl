@@ -30,8 +30,8 @@ import {
   SDLK_RALT,
   ASCII_A_LOWER,
   ASCII_Z_LOWER,
-} from "../Sdl2/consts";
-import type { SdlKeyEvent } from "../Sdl2/types";
+} from "../Sdl2";
+import type { SdlKeyEvent } from "../Sdl2";
 import {
   ASCII_PRINTABLE_START,
   ASCII_PRINTABLE_END,
@@ -342,5 +342,6 @@ export class InputBridge {
   }
 }
 
-// Re-export types
-export type { SdlKeyEvent } from "../Sdl2/types";
+// Re-export consts and types
+export * from "./consts";
+export type { SdlKeyEvent } from "../Sdl2";

@@ -530,3 +530,6 @@ export class AnsiParser {
     this.bold = false;
   }
 }
+
+// Re-export consts
+export * from "./consts";

@@ -579,3 +579,6 @@ export class TextRenderer {
     }
   }
 }
+
+// Re-export consts
+export * from "./consts";

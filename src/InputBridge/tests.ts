@@ -15,7 +15,7 @@ import {
   SDLK_LSHIFT,
   SDLK_LALT,
   ASCII_A_LOWER,
-} from "../Sdl2/consts";
+} from "../Sdl2";
 
 describe("InputBridge", () => {
   let bridge: InputBridge;

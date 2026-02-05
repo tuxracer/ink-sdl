@@ -7,8 +7,11 @@
 
 import { Writable } from "stream";
 import { isString } from "remeda";
-import type { SdlUiRenderer } from "../SdlUiRenderer";
-import { DEFAULT_COLUMNS, DEFAULT_ROWS } from "../SdlUiRenderer/consts";
+import {
+  DEFAULT_COLUMNS,
+  DEFAULT_ROWS,
+  type SdlUiRenderer,
+} from "../SdlUiRenderer";
 
 /**
  * SDL Output Stream

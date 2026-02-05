@@ -961,3 +961,6 @@ export class SdlUiRenderer {
     return this.sdl.getDisplayRefreshRate(this.window);
   }
 }
+
+// Re-export consts
+export * from "./consts";
