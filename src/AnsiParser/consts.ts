@@ -2,6 +2,14 @@
  * AnsiParser Constants
  */
 
+import type { Color } from "./types";
+
+/** Default foreground color (white) */
+export const DEFAULT_FG: Color = { r: 255, g: 255, b: 255 };
+
+/** Default background color (black) */
+export const DEFAULT_BG: Color = { r: 0, g: 0, b: 0 };
+
 /** Number of standard (non-bright) colors in ANSI 16 palette */
 export const ANSI_STANDARD_COLOR_COUNT = 8;
 

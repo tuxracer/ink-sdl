@@ -21,17 +21,13 @@ import {
   ANSI_CUBE_STEP,
   ANSI_CUBE_BASE,
   ANSI_256_COLOR_LEVELS,
+  DEFAULT_FG,
+  DEFAULT_BG,
 } from "./consts";
 
 import type { Color, DrawCommand } from "./types";
 
 export * from "./types";
-
-/** Default foreground color (white) */
-const DEFAULT_FG: Color = { r: 255, g: 255, b: 255 };
-
-/** Default background color (black) */
-const DEFAULT_BG: Color = { r: 0, g: 0, b: 0 };
 
 /** ANSI 16 basic colors (normal intensity) */
 const ANSI_COLORS_NORMAL: Color[] = [
