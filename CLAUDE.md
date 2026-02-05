@@ -8,7 +8,7 @@ See [README.md](README.md) for installation prerequisites, API documentation, an
 
 ## Source Structure
 
-Each module is a directory named after its primary export, containing `index.ts` and optionally `consts.ts` for module-specific constants:
+Each module is a directory named after its primary export, containing `index.ts` and optionally `consts.ts` for module-specific constants, `types.ts` for type definitions and type guards, and `tests.ts` for related tests.
 
 - `src/SdlWindow/` - Main API (`createSdlStreams`, `SdlWindow`)
 - `src/SdlInputStream/` - Readable stream for keyboard input
@@ -63,7 +63,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
   src/
     TitleScreen/
       index.ts       # exports showTitleScreen()
-      index.test.ts  # tests for the module
+      tests.ts  # tests for the module
       consts.ts      # LOGO, PROMPT_TEXT, etc.
     Game/
       index.ts       # exports Game class
@@ -200,7 +200,7 @@ pnpm check      # Format, lint, and typecheck (run before commits)
     if (isMyError(error)) {
       switch (error.code) {
         case "NOT_FOUND": // TypeScript knows valid codes
-          // ...
+        // ...
       }
     }
   }
